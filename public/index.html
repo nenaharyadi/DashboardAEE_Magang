@@ -3,89 +3,137 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Analytics AEE — Universitas Padjadjaran</title>
+  <title>Executive Dashboard Analytics AEE — Universitas Padjadjaran</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
 
-  <!-- Header Header Navbar -->
-  <header class="bg-amber-800 text-white shadow-md">
+  <!-- Header Navbar dengan Identitas User & Logout -->
+  <header class="bg-amber-800 text-white shadow-lg border-b border-amber-900">
     <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight">System Analytics AEE Unpad</h1>
-        <p class="text-xs text-amber-200 mt-0.5">Monitoring Akademik & Analytics Engine Universitas Padjadjaran</p>
+        <h1 class="text-2xl font-black tracking-tight">Platform Analytics AEE Unpad</h1>
+        <p id="headerSubtitle" class="text-xs text-amber-200 mt-0.5">Dashboard Eksekutif Monitoring Proyeksi Laju Studi</p>
       </div>
-      <div class="flex items-center gap-2">
-        <span class="bg-amber-900 text-amber-100 text-xs px-3 py-1.5 rounded-full border border-amber-700 font-mono">Database: MySQL (AMPPS)</span>
+      <div class="flex items-center gap-3">
+        <div class="text-right">
+          <span id="userNameDisplay" class="text-xs font-bold block">-</span>
+          <span id="userRoleBadge" class="text-[10px] bg-amber-950 text-amber-200 px-2 py-0.5 rounded uppercase font-mono">-</span>
+        </div>
+        <button onclick="logout()" class="bg-rose-700 hover:bg-rose-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+          Keluar
+        </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="max-w-7xl mx-auto px-6 py-8 flex-1 w-full">
+  <main class="max-w-7xl mx-auto px-6 py-8 flex-1 w-full space-y-8">
 
-    <!-- Executive Summary Metrics (Card Rumus AEE) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-      
-      <!-- Card 1: Indeks AEE -->
+    <!-- 4 Card Metric Utama (9 Rumus AEE) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
       <div class="bg-white rounded-xl p-5 shadow-sm border-l-4 border-amber-600">
         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Indeks AEE (%)</p>
         <h3 id="cardAEE" class="text-3xl font-black text-amber-600 mt-2">-- %</h3>
-        <p class="text-xs text-slate-500 mt-1">Formula F1 (KTW, Masa Studi, TA)</p>
+        <p class="text-xs text-slate-500 mt-1">Rumus F1 (KTW, Masa Studi, TA)</p>
       </div>
 
-      <!-- Card 2: Total Merah Kritis -->
       <div class="bg-white rounded-xl p-5 shadow-sm border-l-4 border-rose-600">
-        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Mhs Kritis (Sem > 8)</p>
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Mhs Kritis (Lebih > 8 Sem)</p>
         <h3 id="cardMerah" class="text-3xl font-black text-rose-600 mt-2">--</h3>
-        <p class="text-xs text-rose-600 mt-1">Formula F2 Red-Flag Visual</p>
+        <p class="text-xs text-rose-600 mt-1">Rumus F2 Red-Flag (Kecuali Cuti)</p>
       </div>
 
-      <!-- Card 3: Early Warning (Kuning) -->
       <div class="bg-white rounded-xl p-5 shadow-sm border-l-4 border-amber-500">
         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Early Warning Aktif</p>
         <h3 id="cardKuning" class="text-3xl font-black text-amber-600 mt-2">--</h3>
-        <p class="text-xs text-amber-600 mt-1">Formula F3 (Ri ≥ 1.0 / Sem ≥ 7)</p>
+        <p class="text-xs text-amber-600 mt-1">Rumus F3 (Ri ≥ 1.0 / Sisa ≤ 1 Sem)</p>
       </div>
 
-      <!-- Card 4: KTW % -->
       <div class="bg-white rounded-xl p-5 shadow-sm border-l-4 border-emerald-600">
         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Lulus Tepat Waktu (KTW)</p>
         <h3 id="cardKTW" class="text-3xl font-black text-emerald-600 mt-2">-- %</h3>
-        <p class="text-xs text-slate-500 mt-1">Formula F6 (Lulus ≤ 8 Sem)</p>
+        <p class="text-xs text-slate-500 mt-1">Rumus F6 (Lulus ≤ 8 Semester)</p>
       </div>
-
     </div>
 
-    <!-- Filter Bar & Data Tabel Mahasiswa -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8">
-      
+    <!-- Rekap Jumlah Prodi (S1 & D4) per Fakultas -->
+    <div id="sectionRekapFakultas" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 border-b border-slate-100 pb-3">
+        <div>
+          <h2 class="text-base font-bold text-slate-800">Sebaran Program Studi per Fakultas (Satu Data Unpad)</h2>
+          <p class="text-xs text-slate-500">Total 73 Program Studi resmi (59 Sarjana S1 + 14 Sarjana Terapan D4) pada 16 Fakultas</p>
+        </div>
+        <span id="badgeTotalProdi" class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">73 Prodi</span>
+      </div>
+      <div id="gridRekapFakultas" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 text-xs"></div>
+    </div>
+
+    <!-- 4 Grafik Visualisasi Eksekutif -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+          <h3 class="font-bold text-slate-800 text-sm">1. Kalkulasi Indeks AEE Otomatis</h3>
+          <span class="text-[11px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded font-medium">Rumus F1</span>
+        </div>
+        <div class="h-60"><canvas id="chartIndeksAEE"></canvas></div>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+          <h3 class="font-bold text-slate-800 text-sm">2. Deteksi Tren Keterlambatan Studi</h3>
+          <span class="text-[11px] bg-rose-50 text-rose-700 px-2 py-0.5 rounded font-medium">Rumus F2 & F3</span>
+        </div>
+        <div class="h-60"><canvas id="chartTrenKeterlambatan"></canvas></div>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+          <h3 class="font-bold text-slate-800 text-sm">3. Proyeksi Kelulusan per Angkatan</h3>
+          <span class="text-[11px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-medium">Rumus F5</span>
+        </div>
+        <div class="h-60"><canvas id="chartProyeksiKelulusan"></canvas></div>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+          <h3 class="font-bold text-slate-800 text-sm">4. Funnel Progres Tugas Akhir (TA)</h3>
+          <span class="text-[11px] bg-sky-50 text-sky-700 px-2 py-0.5 rounded font-medium">Rumus F4</span>
+        </div>
+        <div class="h-60"><canvas id="chartProgresTA"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Tabel Mahasiswa dengan Perhitungan Sisa / Lebih Semester -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div class="p-6 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h2 class="text-lg font-bold text-slate-800">Monitoring Visual & Status Perwalian Mahasiswa</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Data terhubung langsung dari database MySQL `dashboard_aee_unpad` AMPPS</p>
+          <h2 class="text-lg font-bold text-slate-800">Monitoring Sisa / Lebih Semester Mahasiswa</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Menghitung selisih terhadap batas studi normal 8 semester (Klik nama mahasiswa untuk detail & klarifikasi)</p>
         </div>
 
-        <!-- Dropdown Filter Fakultas & Prodi -->
-        <div class="flex flex-wrap items-center gap-3">
-          <select id="selectFakultas" onchange="onFakultasChange()" class="bg-slate-50 border border-slate-300 text-slate-700 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
-            <option value="">Semua Fakultas (16 Fakultas + 1 SV)</option>
+        <!-- Filter Dropdown (Otomatis terkunci sesuai Role) -->
+        <div class="flex flex-wrap items-center gap-2">
+          <select id="selectFakultas" onchange="onFilterChange()" class="bg-slate-50 border border-slate-300 text-slate-700 rounded-lg px-3 py-2 text-xs">
+            <option value="">Semua Fakultas (16 Fakultas)</option>
           </select>
-          <select id="selectProdi" onchange="onProdiChange()" class="bg-slate-50 border border-slate-300 text-slate-700 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+          <select id="selectProdi" onchange="onFilterChange()" class="bg-slate-50 border border-slate-300 text-slate-700 rounded-lg px-3 py-2 text-xs">
             <option value="">Semua Program Studi (73 Prodi)</option>
+          </select>
+          <select id="selectDoswal" onchange="onFilterChange()" class="bg-slate-50 border border-slate-300 text-slate-700 rounded-lg px-3 py-2 text-xs">
+            <option value="">Semua Dosen Wali</option>
           </select>
         </div>
       </div>
 
-      <!-- Tabel Mahasiswa -->
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs text-slate-600">
           <thead class="bg-slate-50 text-slate-700 uppercase tracking-wider text-[11px] border-b border-slate-200">
             <tr>
               <th class="px-4 py-3">NPM</th>
               <th class="px-4 py-3">Nama Mahasiswa</th>
-              <th class="px-4 py-3">Program Studi</th>
-              <th class="px-4 py-3 text-center">Semester</th>
+              <th class="px-4 py-3">Prodi / Dosen Wali</th>
+              <th class="px-4 py-3 text-center">Sisa / Lebih Semester</th>
               <th class="px-4 py-3 text-center">SKS Lulus</th>
               <th class="px-4 py-3 text-center">IPK</th>
               <th class="px-4 py-3 text-center">Tahap TA</th>
@@ -94,150 +142,389 @@
             </tr>
           </thead>
           <tbody id="tableMahasiswaBody" class="divide-y divide-slate-200">
-            <tr>
-              <td colspan="9" class="text-center py-8 text-slate-400">Memuat data dari MySQL database...</td>
-            </tr>
+            <tr><td colspan="9" class="text-center py-8 text-slate-400">Memuat data...</td></tr>
           </tbody>
         </table>
       </div>
-
     </div>
 
   </main>
 
+  <!-- Modal Detail Mahasiswa + Form Klarifikasi Dosen Wali -->
+  <div id="modalDetail" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4" onclick="if(event.target.id==='modalDetail') closeModal()">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200">
+      <div class="bg-amber-800 text-white px-6 py-4 flex justify-between items-center">
+        <div>
+          <h3 id="modalNama" class="text-lg font-bold">-</h3>
+          <p id="modalNPM" class="text-xs text-amber-200 font-mono mt-0.5">-</p>
+        </div>
+        <button onclick="closeModal()" class="text-amber-200 hover:text-white text-2xl font-bold">&times;</button>
+      </div>
+
+      <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto text-xs">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <span class="text-slate-400 block">Program Studi</span>
+            <span id="modalProdi" class="font-bold text-slate-800 text-sm mt-0.5 block">-</span>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <span class="text-slate-400 block">Dosen Wali</span>
+            <span id="modalDoswal" class="font-bold text-slate-800 text-sm mt-0.5 block">-</span>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <span class="text-slate-400 block">Posisi Semester</span>
+            <span id="modalSemester" class="font-bold text-slate-800 text-sm mt-0.5 block">-</span>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <span class="text-slate-400 block">SKS Kumulatif</span>
+            <span id="modalSKS" class="font-bold text-slate-800 text-sm mt-0.5 block">-</span>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <span class="text-slate-400 block">IPK</span>
+            <span id="modalIPK" class="font-bold text-slate-800 text-sm mt-0.5 block">-</span>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <span class="text-slate-400 block">Risk Index (Ri)</span>
+            <span id="modalRiskIndex" class="font-bold text-slate-800 font-mono text-sm mt-0.5 block">-</span>
+          </div>
+        </div>
+
+        <!-- Form Klarifikasi Keterlambatan (Bisa diisi Dosen Wali / Admin) -->
+        <div class="bg-amber-50/70 p-4 rounded-xl border border-amber-200 space-y-2">
+          <h4 class="font-bold text-amber-900 uppercase tracking-wider text-[11px]">Form Klarifikasi Keterlambatan (Dosen Wali)</h4>
+          <div class="flex flex-col sm:flex-row gap-2 pt-1">
+            <select id="inputKategoriPemicu" class="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs">
+              <option value="">-- Belum Diisi (Kosong) --</option>
+              <option value="Hambatan TA">Hambatan Tugas Akhir (TA)</option>
+              <option value="MK Prasyarat">Pengulangan MK Prasyarat</option>
+              <option value="Finansial/Pribadi">Kendala Finansial / Pribadi</option>
+              <option value="Stopout">Indikasi Stopout / Tidak Aktif</option>
+            </select>
+            <button onclick="simpanKlarifikasi()" class="bg-amber-700 hover:bg-amber-800 text-white font-semibold px-4 py-2 rounded-lg transition">
+              Simpan Klarifikasi
+            </button>
+          </div>
+        </div>
+
+        <div id="containerPesanWA" class="hidden p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-800 space-y-1">
+          <span class="font-bold block text-[11px] uppercase">Notifikasi WA Otomatis (Rumus F9):</span>
+          <p id="modalPesanWA" class="text-[11px] italic bg-white p-2 rounded border border-rose-200 font-mono text-slate-700"></p>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-end">
+        <button onclick="closeModal()" class="px-4 py-2 bg-slate-700 text-white text-xs font-semibold rounded-lg">Tutup</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API_BASE = '/api';
+    let currentUser = null;
+    let currentAnalyticsData = null;
+    let selectedModalNPM = null;
+    let chart1, chart2, chart3, chart4;
 
-    async function loadMasterData() {
-      try {
-        const resFak = await fetch(`${API_BASE}/fakultas`);
-        const dataFak = await resFak.json();
-        if (dataFak.success) {
-          const selectFak = document.getElementById('selectFakultas');
-          dataFak.data.forEach(f => {
-            selectFak.innerHTML += `<option value="${f.kode}">${f.kode} - ${f.nama}</option>`;
-          });
-        }
-        await loadProdi();
-      } catch (err) {
-        console.error("Gagal memuat master fakultas:", err);
+    // Cek Session Login
+    function checkAuth() {
+      const rawUser = localStorage.getItem('aee_user');
+      if (!rawUser) {
+        window.location.href = '/login.html';
+        return null;
+      }
+      return JSON.parse(rawUser);
+    }
+
+    function logout() {
+      localStorage.removeItem('aee_user');
+      window.location.href = '/login.html';
+    }
+
+    // Helper Hitung Sisa / Lebih Semester (Batas Normal = 8 Semester)
+    function formatSisaLebihSemester(semAktif, statusStudi) {
+      if (statusStudi === 'Lulus') {
+        return `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded font-semibold">Sudah Lulus</span>`;
+      }
+      if (!semAktif || isNaN(semAktif) || semAktif < 1 || semAktif > 14) {
+        return `<span class="bg-rose-50 text-rose-600 px-2 py-0.5 rounded font-mono">Data Tidak Valid</span>`;
+      }
+
+      const selisih = semAktif - 8;
+      if (selisih > 0) {
+        // Lebih dari 8 semester
+        return `<span class="bg-rose-100 text-rose-800 border border-rose-300 px-2.5 py-0.5 rounded-full font-bold">Lebih +${selisih} Sem</span>`;
+      } else if (selisih === 0) {
+        // Tepat di semester 8 (Sisa 0)
+        return `<span class="bg-amber-100 text-amber-800 border border-amber-300 px-2.5 py-0.5 rounded-full font-semibold">Sisa 0 Sem (Batas)</span>`;
+      } else {
+        // Masih punya sisa semester normal
+        const sisa = Math.abs(selisih);
+        return `<span class="bg-emerald-100 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full font-semibold">Sisa ${sisa} Sem</span>`;
       }
     }
 
-    async function loadProdi(kodeFakultas = '') {
-      try {
-        const url = kodeFakultas ? `${API_BASE}/prodi?kodeFakultas=${kodeFakultas}` : `${API_BASE}/prodi`;
-        const resProdi = await fetch(url);
-        const dataProdi = await resProdi.json();
-        if (dataProdi.success) {
-          const selectProdi = document.getElementById('selectProdi');
-          selectProdi.innerHTML = '<option value="">Semua Program Studi (73 Prodi)</option>';
-          dataProdi.data.forEach(p => {
-            selectProdi.innerHTML += `<option value="${p.kode}">${p.kode} - ${p.nama} (${p.jenjang})</option>`;
-          });
-        }
-      } catch (err) {
-        console.error("Gagal memuat master prodi:", err);
+    async function initApp() {
+      currentUser = checkAuth();
+      if (!currentUser) return;
+
+      document.getElementById('userNameDisplay').innerText = currentUser.nama_lengkap;
+      document.getElementById('userRoleBadge').innerText = `ROLE: ${currentUser.role.toUpperCase()}`;
+
+      // Load Dropdown & Rekap Fakultas
+      await Promise.all([loadMasterDropdowns(), loadRekapFakultas()]);
+
+      // Kunci Filter sesuai Role User
+      const selFak = document.getElementById('selectFakultas');
+      const selProdi = document.getElementById('selectProdi');
+      const selDoswal = document.getElementById('selectDoswal');
+
+      if (currentUser.role === 'dekan' && currentUser.kode_fakultas) {
+        selFak.value = currentUser.kode_fakultas;
+        selFak.disabled = true;
+        document.getElementById('headerSubtitle').innerText = `Dashboard Dekan — Fakultas ${currentUser.nama_fakultas}`;
+      } else if (currentUser.role === 'prodi' && currentUser.kode_prodi) {
+        selFak.value = currentUser.kode_fakultas || '';
+        selFak.disabled = true;
+        selProdi.value = currentUser.kode_prodi;
+        selProdi.disabled = true;
+        document.getElementById('headerSubtitle').innerText = `Dashboard Ketua Program Studi — ${currentUser.nama_prodi || currentUser.kode_prodi}`;
+      } else if (currentUser.role === 'dosen') {
+        selFak.value = currentUser.kode_fakultas || '';
+        selFak.disabled = true;
+        selProdi.value = currentUser.kode_prodi || '';
+        selProdi.disabled = true;
+        selDoswal.value = currentUser.id;
+        selDoswal.disabled = true;
+        document.getElementById('headerSubtitle').innerText = `Dashboard Dosen Wali — Mahasiswa Perwalian ${currentUser.nama_lengkap}`;
+      }
+
+      onFilterChange();
+    }
+
+    async function loadMasterDropdowns() {
+      const [resFak, resProdi, resDoswal] = await Promise.all([
+        fetch(`${API_BASE}/fakultas`).then(r => r.json()),
+        fetch(`${API_BASE}/prodi`).then(r => r.json()),
+        fetch(`${API_BASE}/dosen-wali`).then(r => r.json())
+      ]);
+
+      if (resFak.success) {
+        const selFak = document.getElementById('selectFakultas');
+        resFak.data.forEach(f => selFak.innerHTML += `<option value="${f.kode}">${f.kode} - ${f.nama}</option>`);
+      }
+      if (resProdi.success) {
+        const selProdi = document.getElementById('selectProdi');
+        selProdi.innerHTML += `<option value="9901">9901 - Teknik Informatika (Cohort Excel)</option>`;
+        resProdi.data.forEach(p => selProdi.innerHTML += `<option value="${p.kode}">${p.kode} - ${p.nama} (${p.jenjang})</option>`);
+      }
+      if (resDoswal.success) {
+        const selDoswal = document.getElementById('selectDoswal');
+        resDoswal.data.forEach(d => selDoswal.innerHTML += `<option value="${d.id}">${d.nama_lengkap} (${d.total_bimbingan} Mhs)</option>`);
       }
     }
 
-    async function fetchAnalytics(kodeProdi = '', kodeFakultas = '') {
-      try {
-        let url = `${API_BASE}/aee/analytics`;
-        const params = new URLSearchParams();
-        if (kodeProdi) params.append('kodeProdi', kodeProdi);
-        else if (kodeFakultas) params.append('kodeFakultas', kodeFakultas);
-        
-        if (params.toString()) url += `?${params.toString()}`;
+    async function loadRekapFakultas() {
+      const kodeFak = currentUser.role !== 'admin' ? currentUser.kode_fakultas : '';
+      const url = kodeFak ? `${API_BASE}/rekap-fakultas?kodeFakultas=${kodeFak}` : `${API_BASE}/rekap-fakultas`;
+      const res = await fetch(url).then(r => r.json());
 
-        const res = await fetch(url);
-        const json = await res.json();
-
-        if (json.success) {
-          const summary = json.executiveSummary;
-          document.getElementById('cardAEE').innerText = `${summary.indeksAEEPersen}%`;
-          document.getElementById('cardMerah').innerText = summary.totalMhsKritisMerah;
-          document.getElementById('cardKuning').innerText = summary.peringatanDiniAktif;
-          document.getElementById('cardKTW').innerText = `${summary.ktwPersen}%`;
-
-          renderTableMahasiswa(json.detailRumus, json.rawMahasiswa);
-        }
-      } catch (err) {
-        console.error("Gagal memuat data analytics:", err);
+      if (res.success) {
+        const grid = document.getElementById('gridRekapFakultas');
+        let totalAll = 0;
+        grid.innerHTML = res.data.map(f => {
+          totalAll += parseInt(f.total_prodi);
+          return `
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5">
+              <span class="font-bold text-amber-800 block">${f.kode}</span>
+              <span class="text-slate-600 text-[10px] line-clamp-1" title="${f.nama}">${f.nama}</span>
+              <div class="mt-1.5 flex items-center justify-between text-[10px] font-mono">
+                <span class="bg-emerald-100 text-emerald-800 px-1.5 rounded">S1:${f.total_s1}</span>
+                <span class="bg-sky-100 text-sky-800 px-1.5 rounded">D4:${f.total_d4}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+        document.getElementById('badgeTotalProdi').innerText = `Total: ${totalAll} Program Studi`;
       }
     }
 
-    function renderTableMahasiswa(detailRumus, rawMahasiswa) {
+    async function onFilterChange() {
+      const kodeFak = document.getElementById('selectFakultas').value;
+      const kodeProdi = document.getElementById('selectProdi').value;
+      const doswalId = document.getElementById('selectDoswal').value;
+
+      const params = new URLSearchParams();
+      if (kodeFak) params.append('kodeFakultas', kodeFak);
+      if (kodeProdi) params.append('kodeProdi', kodeProdi);
+      if (doswalId) params.append('dosenWaliId', doswalId);
+
+      const res = await fetch(`${API_BASE}/aee/analytics?${params.toString()}`).then(r => r.json());
+      if (res.success) {
+        currentAnalyticsData = res;
+        const s = res.executiveSummary;
+        document.getElementById('cardAEE').innerText = `${s.indeksAEEPersen}%`;
+        document.getElementById('cardMerah').innerText = s.totalMhsKritisMerah;
+        document.getElementById('cardKuning').innerText = s.peringatanDiniAktif;
+        document.getElementById('cardKTW').innerText = `${s.ktwPersen}%`;
+
+        renderCharts(res.detailRumus);
+        renderTable(res.rawMahasiswa, res.detailRumus);
+      }
+    }
+
+    function renderCharts(detail) {
+      if (chart1) chart1.destroy();
+      if (chart2) chart2.destroy();
+      if (chart3) chart3.destroy();
+      if (chart4) chart4.destroy();
+
+      const f1Komp = detail.F1_AEE.komponen || {};
+      chart1 = new Chart(document.getElementById('chartIndeksAEE'), {
+        type: 'doughnut',
+        data: {
+          labels: ['KTW (40%)', 'Efisiensi Masa Studi (30%)', 'Progres TA (30%)'],
+          datasets: [{
+            data: [((f1Komp.ktwRatio || 0) * 40).toFixed(2), ((f1Komp.efisiensiMasaStudi || 0) * 30).toFixed(2), ((f1Komp.progresTARatio || 0) * 30).toFixed(2)],
+            backgroundColor: ['#10b981', '#d97706', '#0284c7']
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      });
+
+      const f2Sum = detail.F2_RedFlag.summary || {};
+      const f3Sum = detail.F3_EarlyWarning.summary || {};
+      chart2 = new Chart(document.getElementById('chartTrenKeterlambatan'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Hijau (Aman)', 'Kuning (Warning)', 'Merah (Lebih > 8 Sem)', 'Abu (Cuti Resmi)'],
+          datasets: [{
+            data: [Math.max(0, f2Sum.totalHijau - f3Sum.totalBadgeKuning), f3Sum.totalBadgeKuning, f2Sum.totalMerahKritis, f2Sum.totalCutiAbu],
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#94a3b8']
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      });
+
+      const f5 = detail.F5_Proyeksi || {};
+      chart3 = new Chart(document.getElementById('chartProyeksiKelulusan'), {
+        type: 'bar',
+        data: {
+          labels: ['Sudah Lulus', 'Proyeksi Wisuda', 'Total Proyeksi', 'Total Cohort'],
+          datasets: [{ data: [f5.sudahLulus || 0, f5.proyeksiWisudaMendatang || 0, f5.totalProyeksiLulus || 0, f5.N_Cohort || 0], backgroundColor: ['#059669', '#3b82f6', '#d97706', '#64748b'] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+
+      const funnel = detail.F4_DurasiTA.funnel || [];
+      chart4 = new Chart(document.getElementById('chartProgresTA'), {
+        type: 'bar',
+        data: {
+          labels: funnel.map(f => f.tahap),
+          datasets: [{ data: funnel.map(f => f.jumlahMahasiswa), backgroundColor: ['#38bdf8', '#0284c7', '#0369a1', '#075985', '#0c4a6e'] }]
+        },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+    }
+
+    function renderTable(mhsList, detailRumus) {
       const tbody = document.getElementById('tableMahasiswaBody');
-      const redFlagList = detailRumus.F2_RedFlag.detail || [];
-      const earlyWarningList = detailRumus.F3_EarlyWarning.detail || [];
-
-      if (!redFlagList.length) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-6 text-slate-400">Tidak ada data mahasiswa.</td></tr>`;
+      if (!mhsList.length) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-6 text-slate-400">Tidak ada data mahasiswa untuk filter ini.</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = redFlagList.map((mhs, idx) => {
-        const raw = rawMahasiswa[idx] || {};
-        const ew = earlyWarningList[idx] || {};
+      const rfMap = new Map((detailRumus.F2_RedFlag.detail || []).map(i => [i.npm, i]));
+      const ewMap = new Map((detailRumus.F3_EarlyWarning.detail || []).map(i => [i.npm, i]));
+
+      tbody.innerHTML = mhsList.map(m => {
+        const rf = rfMap.get(m.npm) || {};
+        const ew = ewMap.get(m.npm) || {};
 
         let badgeStyle = 'bg-slate-100 text-slate-600';
-        let labelText = mhs.colorStatus;
+        let labelText = m.status_studi === 'Lulus' ? 'LULUS' : (rf.colorStatus || 'Hijau');
 
-        if (mhs.colorStatus === 'Merah') {
-          badgeStyle = 'bg-rose-100 text-rose-700 font-semibold border border-rose-200';
-          labelText = 'MERAH (>8 Sem)';
-        } else if (mhs.colorStatus === 'Cuti Resmi (Abu)') {
-          badgeStyle = 'bg-slate-200 text-slate-700 border border-slate-300';
-          labelText = 'Abu (Cuti Resmi)';
-        } else if (ew.badgeColor === 'Kuning') {
-          badgeStyle = 'bg-amber-100 text-amber-800 font-semibold border border-amber-200';
-          labelText = 'KUNING (Warning)';
-        } else if (mhs.colorStatus === 'Hijau') {
-          badgeStyle = 'bg-emerald-100 text-emerald-700 border border-emerald-200';
-          labelText = 'HIJAU (Aman)';
-        }
+        if (m.status_studi === 'Lulus') badgeStyle = 'bg-emerald-100 text-emerald-800 font-semibold';
+        else if (rf.colorStatus === 'Merah') { badgeStyle = 'bg-rose-100 text-rose-700 font-semibold'; labelText = 'MERAH (Kritis)'; }
+        else if (rf.colorStatus === 'Cuti Resmi (Abu)') { badgeStyle = 'bg-slate-200 text-slate-700'; labelText = 'Abu (Cuti)'; }
+        else if (ew.badgeColor === 'Kuning') { badgeStyle = 'bg-amber-100 text-amber-800 font-semibold'; labelText = 'KUNING (Warning)'; }
+        else if (rf.colorStatus === 'Hijau') { badgeStyle = 'bg-emerald-100 text-emerald-700'; labelText = 'HIJAU (Aman)'; }
 
         return `
           <tr class="hover:bg-slate-50 transition-colors">
-            <td class="px-4 py-3 font-mono font-medium text-slate-900">${mhs.npm}</td>
-            <td class="px-4 py-3 font-medium text-slate-800">${mhs.nama}</td>
-            <td class="px-4 py-3 text-slate-500">${raw.nama_prodi || raw.kode_prodi}</td>
-            <td class="px-4 py-3 text-center font-bold text-slate-700">${mhs.semesterAktif || '-'}</td>
-            <td class="px-4 py-3 text-center">${ew.sksKumulatif || 0}</td>
-            <td class="px-4 py-3 text-center font-mono">${raw.ipk || '0.00'}</td>
-            <td class="px-4 py-3 text-center">
-              <span class="bg-sky-50 text-sky-700 px-2 py-0.5 rounded text-[11px] font-medium border border-sky-200">
-                ${raw.status_ta || 'Belum TA'}
-              </span>
+            <td class="px-4 py-3 font-mono font-medium text-slate-900">${m.npm}</td>
+            <td class="px-4 py-3 font-semibold text-amber-700 hover:underline cursor-pointer" onclick="openModal('${m.npm}')">${m.nama}</td>
+            <td class="px-4 py-3">
+              <span class="block text-slate-700 font-medium">${m.nama_prodi}</span>
+              <span class="text-[10px] text-slate-400">Doswal: ${m.nama_dosen_wali || '-'}</span>
             </td>
-            <td class="px-4 py-3 text-center font-mono font-medium">${ew.riskIndex !== null ? ew.riskIndex : '-'}</td>
-            <td class="px-4 py-3 text-center">
-              <span class="px-2.5 py-1 rounded-full text-[11px] inline-block ${badgeStyle}">
-                ${labelText}
-              </span>
-            </td>
+            <td class="px-4 py-3 text-center">${formatSisaLebihSemester(m.semester_aktif, m.status_studi)}</td>
+            <td class="px-4 py-3 text-center font-medium">${m.sks_kumulatif}</td>
+            <td class="px-4 py-3 text-center font-mono">${m.ipk}</td>
+            <td class="px-4 py-3 text-center"><span class="bg-sky-50 text-sky-700 px-2 py-0.5 rounded text-[11px]">${m.status_ta || 'Belum TA'}</span></td>
+            <td class="px-4 py-3 text-center font-mono">${ew.riskIndex ?? '-'}</td>
+            <td class="px-4 py-3 text-center"><span class="px-2.5 py-1 rounded-full text-[11px] ${badgeStyle}">${labelText}</span></td>
           </tr>
         `;
       }).join('');
     }
 
-    function onFakultasChange() {
-      const kodeFak = document.getElementById('selectFakultas').value;
-      loadProdi(kodeFak);
-      fetchAnalytics('', kodeFak);
+    function openModal(npm) {
+      if (!currentAnalyticsData) return;
+      selectedModalNPM = npm;
+      const m = currentAnalyticsData.rawMahasiswa.find(x => x.npm === npm);
+      const ew = (currentAnalyticsData.detailRumus.F3_EarlyWarning.detail || []).find(x => x.npm === npm) || {};
+      const wa = (currentAnalyticsData.detailRumus.F9_Notifikasi.detail || []).find(x => x.npm === npm) || {};
+
+      document.getElementById('modalNama').innerText = m.nama;
+      document.getElementById('modalNPM').innerText = `NPM: ${m.npm} | Angkatan ${m.angkatan}`;
+      document.getElementById('modalProdi').innerText = m.nama_prodi;
+      document.getElementById('modalDoswal').innerText = m.nama_dosen_wali || '-';
+
+      const selisih = m.semester_aktif ? m.semester_aktif - 8 : null;
+      const teksSem = m.status_studi === 'Lulus'
+        ? `Lulus (Sem ${m.semester_lulus})`
+        : (selisih === null ? 'Tidak Valid' : (selisih > 0 ? `Lebih +${selisih} Sem (Sem ${m.semester_aktif})` : `Sisa ${Math.abs(selisih)} Sem (Sem ${m.semester_aktif})`));
+
+      document.getElementById('modalSemester').innerText = teksSem;
+      document.getElementById('modalSKS').innerText = `${m.sks_kumulatif} SKS`;
+      document.getElementById('modalIPK').innerText = m.ipk;
+      document.getElementById('modalRiskIndex').innerText = ew.riskIndex ?? '-';
+      document.getElementById('inputKategoriPemicu').value = m.kategori_pemicu || '';
+
+      const boxWA = document.getElementById('containerPesanWA');
+      if (wa.pesan) {
+        document.getElementById('modalPesanWA').innerText = wa.pesan;
+        boxWA.classList.remove('hidden');
+      } else {
+        boxWA.classList.add('hidden');
+      }
+
+      document.getElementById('modalDetail').classList.remove('hidden');
+      document.getElementById('modalDetail').classList.add('flex');
     }
 
-    function onProdiChange() {
-      const kodeProdi = document.getElementById('selectProdi').value;
-      const kodeFak = document.getElementById('selectFakultas').value;
-      fetchAnalytics(kodeProdi, kodeFak);
+    function closeModal() {
+      document.getElementById('modalDetail').classList.add('hidden');
+      document.getElementById('modalDetail').classList.remove('flex');
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      loadMasterData();
-      fetchAnalytics();
-    });
+    async function simpanKlarifikasi() {
+      if (!selectedModalNPM) return;
+      const kategori_pemicu = document.getElementById('inputKategoriPemicu').value;
+      const res = await fetch(`${API_BASE}/mahasiswa/${selectedModalNPM}/klarifikasi`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kategori_pemicu })
+      }).then(r => r.json());
+
+      if (res.success) {
+        alert(res.message);
+        closeModal();
+        onFilterChange();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
   </script>
 </body>
 </html>
