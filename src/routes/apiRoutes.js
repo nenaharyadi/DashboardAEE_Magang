@@ -19,4 +19,11 @@ router.get('/dosen-wali', masterController.getDosenWali);
 router.get('/aee/analytics', aeeController.getAnalyticsAEE);
 router.post('/mahasiswa/:npm/klarifikasi', aeeController.updateKlarifikasiDosenWali);
 
+// Revisi #1: Admin Edit Data Mahasiswa
+router.put('/mahasiswa/:npm', aeeController.updateMahasiswa);
+
+// Revisi #2: Admin Pengaturan Parameter & Rumus AEE
+router.get('/parameters', aeeController.getParameters);
+router.put('/parameters', aeeController.updateParameters);
+
 module.exports = router;
