@@ -3,417 +3,601 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Executive Dashboard Analytics AEE — Universitas Padjadjaran</title>
+  <title>Portal Analitik Akademik — Dashboard AEE Unpad</title>
+  <link rel="icon" type="image/webp" href="/images/logo-unpad2.webp">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #F8F9FA;
+      color: #1E293B;
+    }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .gold-badge { background-color: #EBB328; color: #1E293B; }
+    .gold-accent-bar { background-color: #E5A91A; }
+    .portal-pill {
+      background-color: #FDF7E7;
+      color: #9A6B11;
+      border: 1px solid #F3E2BA;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #F1F5F9; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+  </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
+<body class="antialiased">
 
-  <!-- Header Navbar dengan Identitas User, Tombol Rumus Admin & Logout -->
-  <header class="bg-amber-800 text-white shadow-lg border-b border-amber-900">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-      <div>
-        <h1 class="text-2xl font-black tracking-tight">Platform Analytics AEE Unpad</h1>
-        <p id="headerSubtitle" class="text-xs text-amber-200 mt-0.5">Dashboard Eksekutif Monitoring Proyeksi Laju Studi</p>
-      </div>
-      <div class="flex flex-wrap items-center gap-3">
-        <!-- Tombol Khusus Admin: Pengaturan Rumus AEE -->
-        <button id="btnOpenRumus" onclick="openRumusModal()" class="hidden bg-amber-950 hover:bg-slate-900 border border-amber-500/40 text-amber-100 text-xs font-semibold px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 shadow-sm">
-          <span>⚙️</span>
-          <span>Atur Rumus & Bobot AEE</span>
+  <!-- Garis Emas Unpad di Paling Atas -->
+  <div class="h-1 w-full gold-accent-bar sticky top-0 z-40"></div>
+
+  <!-- TOP HEADER BAR (PUTIH + LOGO UNPAD + PORTAL ANALITIK AKADEMIK) -->
+  <header class="bg-white border-b border-slate-200/90 sticky top-1 z-30">
+    <div class="px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <!-- Kiri: Tombol Toggle Sidebar + Logo Resmi Unpad -->
+      <div class="flex items-center gap-3.5">
+        <button type="button" onclick="toggleSidebarExpand()" title="Buka/Tutup Menu"
+          class="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
         </button>
 
-        <div class="text-right">
-          <span id="userNameDisplay" class="text-xs font-bold block">-</span>
-          <span id="userRoleBadge" class="text-[10px] bg-amber-950 text-amber-200 px-2 py-0.5 rounded uppercase font-mono">-</span>
+        <!-- Logo & Wordmark Universitas Padjadjaran -->
+        <a href="#section-kpi" class="flex items-center gap-2.5 select-none">
+          <img src="/images/logo-unpad2.webp" alt="Logo Unpad" class="w-10 h-10 object-contain shrink-0">
+
+          <div class="flex items-baseline gap-1.5">
+            <span class="text-2xl font-extrabold tracking-tight text-slate-900">Unpad</span>
+            <span class="hidden sm:inline-block text-[11px] font-semibold text-slate-400 border-l border-slate-200 pl-2">
+              Universitas Padjadjaran
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Kanan: Pill Portal Analitik Akademik + Tombol Rumus Admin + Profil & Keluar -->
+      <div class="flex items-center gap-2.5">
+        <span class="hidden md:inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold portal-pill">
+          Portal Analitik Akademik
+        </span>
+
+        <button id="btnHeaderParam" type="button" onclick="openParamModal()"
+          class="hidden items-center gap-1.5 gold-badge hover:brightness-95 font-bold text-xs px-3.5 py-2 rounded-xl shadow-xs transition">
+          <span>⚙️</span>
+          <span class="hidden sm:inline">Atur Rumus AEE</span>
+        </button>
+
+        <div class="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-1.5">
+          <div id="userAvatarInitial" class="w-7 h-7 rounded-lg gold-badge font-extrabold text-[11px] flex items-center justify-center">
+            AD
+          </div>
+          <div class="leading-tight">
+            <div id="headerUserName" class="text-xs font-bold text-slate-800 max-w-[140px] truncate">Admin Pusat</div>
+            <div id="headerUserRole" class="text-[10px] font-mono font-bold text-amber-700 uppercase">ADMIN</div>
+          </div>
         </div>
-        <button onclick="logout()" class="bg-rose-700 hover:bg-rose-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+
+        <button type="button" onclick="logout()"
+          class="px-3 py-2 rounded-xl border border-slate-200 hover:border-rose-300 hover:bg-rose-50 text-slate-600 hover:text-rose-700 font-bold text-xs transition">
           Keluar
         </button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-6 py-8 flex-1 w-full space-y-6">
+  <div class="flex min-h-[calc(100vh-4.25rem)]">
+    <!-- Backdrop Mobile -->
+    <div id="sidebarBackdrop" onclick="toggleSidebarExpand()" class="fixed inset-0 bg-slate-900/30 z-20 hidden lg:hidden"></div>
 
-    <!-- 4 Card Metric Utama (9 Rumus AEE) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      <div class="bg-white rounded-xl p-5 shadow-sm border-l-4 border-amber-600">
-        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Indeks AEE (%)</p>
-        <h3 id="cardAEE" class="text-3xl font-black text-amber-600 mt-2">-- %</h3>
-        <p class="text-xs text-slate-500 mt-1">Rumus F1 (KTW, Masa Studi, TA)</p>
+    <!-- SIDEBAR PUTIH RAMPING -->
+    <aside id="appSidebar" class="fixed lg:static inset-y-0 left-0 z-20 w-16 bg-white border-r border-slate-200/90 flex flex-col justify-between transition-all duration-200 shrink-0 select-none">
+      <nav class="p-2.5 space-y-2 mt-2">
+        <a href="#section-kpi" onclick="setActiveNav(this)" title="Ringkasan Eksekutif"
+          class="nav-item flex items-center gap-3 p-2.5 rounded-xl gold-badge font-bold shadow-xs transition">
+          <svg class="w-5 h-5 shrink-0 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+          <span class="sidebar-label hidden text-xs whitespace-nowrap">Ringkasan AEE</span>
+        </a>
+
+        <a href="#section-charts" onclick="setActiveNav(this)" title="Grafik & Funnel TA"
+          class="nav-item flex items-center gap-3 p-2.5 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-semibold transition">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          <span class="sidebar-label hidden text-xs whitespace-nowrap">Ringkasan &amp; Grafik</span>
+        </a>
+
+        <a href="#section-tabel" onclick="setActiveNav(this)" title="Matriks Stagnasi & Red-Flag"
+          class="nav-item flex items-center gap-3 p-2.5 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-semibold transition relative">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+          </svg>
+          <span class="sidebar-label hidden text-xs whitespace-nowrap">Matriks Mahasiswa</span>
+        </a>
+
+        <a href="#section-wa" onclick="setActiveNav(this)" title="Notifikasi WhatsApp Dosen Wali"
+          class="nav-item flex items-center gap-3 p-2.5 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-semibold transition">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+          <span class="sidebar-label hidden text-xs whitespace-nowrap">Alert Dosen Wali</span>
+        </a>
+
+        <button id="sidebarBtnParam" type="button" onclick="openParamModal()" title="Pengaturan Rumus AEE"
+          class="hidden w-full items-center gap-3 p-2.5 rounded-xl text-amber-700 hover:bg-amber-50 font-semibold transition">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"/>
+            <path stroke-linecap="round" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          <span class="sidebar-label hidden text-xs whitespace-nowrap">Atur Rumus AEE</span>
+        </button>
+      </nav>
+
+      <div class="p-2.5 border-t border-slate-100">
+        <button type="button" onclick="toggleSidebarExpand()" title="Perluas / Kecilkan Sidebar"
+          class="w-full flex items-center justify-center p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition text-xs font-mono">
+          <span id="sidebarToggleIcon">&raquo;</span>
+        </button>
       </div>
+    </aside>
 
-      <div class="bg-white rounded-xl p-5 shadow-sm border-l-4 border-rose-600">
-        <p id="labelCardMerah" class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Mhs Kritis (Lebih > 8 Sem)</p>
-        <h3 id="cardMerah" class="text-3xl font-black text-rose-600 mt-2">--</h3>
-        <p class="text-xs text-rose-600 mt-1">Rumus F2 Red-Flag (Kecuali Cuti)</p>
-      </div>
+    <!-- KONTEN UTAMA -->
+    <main class="flex-1 min-w-0 p-4 sm:p-6 lg:px-8 space-y-6 max-w-[1600px] mx-auto">
 
-      <div class="bg-white rounded-xl p-5 shadow-sm border-l-4 border-amber-500">
-        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Early Warning Aktif</p>
-        <h3 id="cardKuning" class="text-3xl font-black text-amber-600 mt-2">--</h3>
-        <p id="subCardKuning" class="text-xs text-amber-600 mt-1">Rumus F3 (Ri ≥ 1.0 / Sisa ≤ 1 Sem)</p>
-      </div>
-
-      <div class="bg-white rounded-xl p-5 shadow-sm border-l-4 border-emerald-600">
-        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Lulus Tepat Waktu (KTW)</p>
-        <h3 id="cardKTW" class="text-3xl font-black text-emerald-600 mt-2">-- %</h3>
-        <p id="subCardKTW" class="text-xs text-slate-500 mt-1">Rumus F6 (Lulus ≤ 8 Semester)</p>
-      </div>
-    </div>
-
-    <!-- Bar Info Parameter Rumus Aktif -->
-    <div class="bg-amber-50 border border-amber-200 rounded-xl px-5 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-amber-900">
-      <div class="flex flex-wrap items-center gap-2">
-        <span class="font-bold uppercase tracking-wider text-[11px] bg-amber-200/80 px-2 py-0.5 rounded">Parameter Rumus Aktif</span>
-        <span id="activeFormulaBanner" class="font-mono text-[11px]">Memuat parameter rumus...</span>
-      </div>
-      <button id="btnBannerRumus" onclick="openRumusModal()" class="hidden text-amber-800 font-bold underline hover:text-amber-950 text-[11px]">
-        Ubah Parameter &rarr;
-      </button>
-    </div>
-
-    <!-- Rekap Jumlah Prodi (S1 & D4) per Fakultas -->
-    <div id="sectionRekapFakultas" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 border-b border-slate-100 pb-3">
-        <div>
-          <h2 class="text-base font-bold text-slate-800">Sebaran Program Studi per Fakultas (Satu Data Unpad)</h2>
-          <p class="text-xs text-slate-500">Total 73 Program Studi resmi (59 Sarjana S1 + 14 Sarjana Terapan D4) pada 16 Fakultas</p>
-        </div>
-        <span id="badgeTotalProdi" class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">73 Prodi</span>
-      </div>
-      <div id="gridRekapFakultas" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 text-xs"></div>
-    </div>
-
-    <!-- 4 Grafik Visualisasi Eksekutif -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
-          <h3 class="font-bold text-slate-800 text-sm">1. Kalkulasi Indeks AEE Otomatis</h3>
-          <span class="text-[11px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded font-medium">Rumus F1</span>
-        </div>
-        <div class="h-60"><canvas id="chartIndeksAEE"></canvas></div>
-      </div>
-
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
-          <h3 class="font-bold text-slate-800 text-sm">2. Deteksi Tren Keterlambatan Studi</h3>
-          <span class="text-[11px] bg-rose-50 text-rose-700 px-2 py-0.5 rounded font-medium">Rumus F2 & F3</span>
-        </div>
-        <div class="h-60"><canvas id="chartTrenKeterlambatan"></canvas></div>
-      </div>
-
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
-          <h3 class="font-bold text-slate-800 text-sm">3. Proyeksi Kelulusan per Angkatan</h3>
-          <span class="text-[11px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-medium">Rumus F5</span>
-        </div>
-        <div class="h-60"><canvas id="chartProyeksiKelulusan"></canvas></div>
-      </div>
-
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
-          <h3 class="font-bold text-slate-800 text-sm">4. Funnel Progres Tugas Akhir (TA)</h3>
-          <span class="text-[11px] bg-sky-50 text-sky-700 px-2 py-0.5 rounded font-medium">Rumus F4</span>
-        </div>
-        <div class="h-60"><canvas id="chartProgresTA"></canvas></div>
-      </div>
-    </div>
-
-    <!-- Tabel Mahasiswa dengan Perhitungan Sisa / Lebih Semester -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-      <div class="p-6 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div>
-          <h2 class="text-lg font-bold text-slate-800">Monitoring Sisa / Lebih Semester Mahasiswa</h2>
-          <p id="subtitleTabelMhs" class="text-xs text-slate-500 mt-0.5">Menghitung selisih terhadap batas studi normal 8 semester (Klik nama mahasiswa untuk detail & klarifikasi)</p>
+      <!-- BARIS JUDUL HALAMAN -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-3">
+          <h1 class="inline-block gold-badge text-lg sm:text-xl font-extrabold tracking-tight px-4 py-1.5 rounded-xl shadow-xs">
+            Academic Educational Efficiency (AEE)
+          </h1>
+          <span id="scopeUnitPill" class="text-xs font-semibold text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-xl">
+            Tingkat Universitas
+          </span>
         </div>
 
-        <!-- Filter Dropdown (Otomatis terkunci sesuai Role) -->
-        <div class="flex flex-wrap items-center gap-2">
-          <select id="selectFakultas" onchange="onFilterChange()" class="bg-slate-50 border border-slate-300 text-slate-700 rounded-lg px-3 py-2 text-xs">
-            <option value="">Semua Fakultas (16 Fakultas)</option>
-          </select>
-          <select id="selectProdi" onchange="onFilterChange()" class="bg-slate-50 border border-slate-300 text-slate-700 rounded-lg px-3 py-2 text-xs">
-            <option value="">Semua Program Studi (73 Prodi)</option>
-          </select>
-          <select id="selectDoswal" onchange="onFilterChange()" class="bg-slate-50 border border-slate-300 text-slate-700 rounded-lg px-3 py-2 text-xs">
-            <option value="">Semua Dosen Wali</option>
-          </select>
+        <div class="text-xs text-slate-400 font-medium flex flex-wrap items-center gap-2">
+          <span id="activeParamBadge" class="font-mono text-[11px] text-slate-500 bg-white border border-slate-200/80 px-2.5 py-1 rounded-lg">
+            Bobot: 40% / 35% / 25% • S0: 8 Sem
+          </span>
+          <span>• Snapshot data aktif</span>
         </div>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs text-slate-600">
-          <thead class="bg-slate-50 text-slate-700 uppercase tracking-wider text-[11px] border-b border-slate-200">
-            <tr>
-              <th class="px-4 py-3">NPM</th>
-              <th class="px-4 py-3">Nama Mahasiswa</th>
-              <th class="px-4 py-3">Prodi / Dosen Wali</th>
-              <th class="px-4 py-3 text-center">Sisa / Lebih Semester</th>
-              <th class="px-4 py-3 text-center">SKS Lulus</th>
-              <th class="px-4 py-3 text-center">IPK</th>
-              <th class="px-4 py-3 text-center">Tahap TA</th>
-              <th class="px-4 py-3 text-center">Risk Index (Ri)</th>
-              <th class="px-4 py-3 text-center">Status Visual</th>
-              <th id="thAksiAdmin" class="hidden px-4 py-3 text-center">Aksi Admin</th>
-            </tr>
-          </thead>
-          <tbody id="tableMahasiswaBody" class="divide-y divide-slate-200">
-            <tr><td colspan="10" class="text-center py-8 text-slate-400">Memuat data...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- ========================================================= -->
-  <!-- MODAL 1: DETAIL MAHASISWA & KLARIFIKASI DOSEN WALI        -->
-  <!-- ========================================================= -->
-  <div id="modalDetail" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4" onclick="if(event.target.id==='modalDetail') closeModal()">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200">
-      <div class="bg-amber-800 text-white px-6 py-4 flex justify-between items-center">
-        <div>
-          <h3 id="modalNama" class="text-lg font-bold">-</h3>
-          <p id="modalNPM" class="text-xs text-amber-200 font-mono mt-0.5">-</p>
-        </div>
-        <button onclick="closeModal()" class="text-amber-200 hover:text-white text-2xl font-bold">&times;</button>
-      </div>
-
-      <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto text-xs">
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-            <span class="text-slate-400 block">Program Studi</span>
-            <span id="modalProdi" class="font-bold text-slate-800 text-sm mt-0.5 block">-</span>
-          </div>
-          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-            <span class="text-slate-400 block">Dosen Wali</span>
-            <span id="modalDoswal" class="font-bold text-slate-800 text-sm mt-0.5 block">-</span>
-          </div>
-          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-            <span class="text-slate-400 block">Posisi Semester</span>
-            <span id="modalSemester" class="font-bold text-slate-800 text-sm mt-0.5 block">-</span>
-          </div>
-          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-            <span class="text-slate-400 block">SKS Kumulatif</span>
-            <span id="modalSKS" class="font-bold text-slate-800 text-sm mt-0.5 block">-</span>
-          </div>
-          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-            <span class="text-slate-400 block">IPK</span>
-            <span id="modalIPK" class="font-bold text-slate-800 text-sm mt-0.5 block">-</span>
-          </div>
-          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-            <span class="text-slate-400 block">Risk Index (Ri)</span>
-            <span id="modalRiskIndex" class="font-bold text-slate-800 font-mono text-sm mt-0.5 block">-</span>
-          </div>
-        </div>
-
-        <!-- Form Klarifikasi Keterlambatan -->
-        <div class="bg-amber-50/70 p-4 rounded-xl border border-amber-200 space-y-2">
-          <h4 class="font-bold text-amber-900 uppercase tracking-wider text-[11px]">Form Klarifikasi Keterlambatan (Dosen Wali)</h4>
-          <div class="flex flex-col sm:flex-row gap-2 pt-1">
-            <select id="inputKategoriPemicu" class="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs">
-              <option value="">-- Belum Diisi (Kosong) --</option>
-              <option value="Hambatan TA">Hambatan Tugas Akhir (TA)</option>
-              <option value="MK Prasyarat">Pengulangan MK Prasyarat</option>
-              <option value="Finansial/Pribadi">Kendala Finansial / Pribadi</option>
-              <option value="Stopout">Indikasi Stopout / Tidak Aktif</option>
+      <!-- KARTU FILTER MULTIDIMENSIONAL -->
+      <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 items-end">
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Fakultas</label>
+            <select id="filterFakultas" onchange="onFilterFakultasChange()"
+              class="w-full bg-[#F8F9FA] border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#E5A91A]">
+              <option value="">Semua Fakultas</option>
             </select>
-            <button onclick="simpanKlarifikasi()" class="bg-amber-700 hover:bg-amber-800 text-white font-semibold px-4 py-2 rounded-lg transition">
-              Simpan Klarifikasi
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Program Studi (Jenjang)</label>
+            <select id="filterProdi" onchange="fetchAnalytics()"
+              class="w-full bg-[#F8F9FA] border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#E5A91A]">
+              <option value="">Semua Program Studi</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Tahun Angkatan</label>
+            <select id="filterAngkatan" onchange="applyClientFilters()"
+              class="w-full bg-[#F8F9FA] border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#E5A91A]">
+              <option value="">Semua Angkatan</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Status Peringatan</label>
+            <select id="filterStatusVisual" onchange="applyClientFilters()"
+              class="w-full bg-[#F8F9FA] border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#E5A91A]">
+              <option value="">Semua Status</option>
+              <option value="Merah">Merah (Kritis &gt; S0)</option>
+              <option value="Kuning">Kuning (Early Warning)</option>
+              <option value="Hijau">Hijau (Normal)</option>
+              <option value="Cuti">Cuti Resmi (Abu)</option>
+              <option value="Lulus">Sudah Lulus</option>
+              <option value="ERROR">Anomali Data SIAT</option>
+            </select>
+          </div>
+
+          <div>
+            <button type="button" onclick="resetFilters()"
+              class="w-full bg-[#F8F9FA] hover:bg-amber-50 border border-slate-200 hover:border-[#E5A91A] rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-700 transition">
+              Reset Filter
             </button>
           </div>
         </div>
-
-        <div id="containerPesanWA" class="hidden p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-800 space-y-1">
-          <span class="font-bold block text-[11px] uppercase">Notifikasi WA Otomatis (Rumus F9):</span>
-          <p id="modalPesanWA" class="text-[11px] italic bg-white p-2 rounded border border-rose-200 font-mono text-slate-700"></p>
+        <div class="mt-3 text-[11px] text-slate-400">
+          Filter otomatis menyesuaikan hak akses role pengguna dan menghitung ulang seluruh indikator secara real-time.
         </div>
+      </section>
+
+      <!-- 5 KARTU METRIK UTAMA -->
+      <section id="section-kpi" class="space-y-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Indeks AEE (F1)</div>
+            <div id="kpiAEE" class="text-3xl font-extrabold text-slate-900 mt-2 tracking-tight">0%</div>
+            <div class="text-[11px] text-slate-400 mt-1.5">Target institusi &ge; 75,0%</div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kelulusan Tepat Waktu (F6)</div>
+            <div id="kpiKTW" class="text-3xl font-extrabold text-slate-900 mt-2 tracking-tight">0%</div>
+            <div class="text-[11px] text-slate-400 mt-1.5">Lulus <span id="kpiKTWBadge">&le; 8 Sem</span> • Rerata <span id="kpiMasaStudi">0</span> Thn</div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Mhs Kritis Red-Flag (F2)</div>
+            <div id="kpiMerah" class="text-3xl font-extrabold text-rose-600 mt-2 tracking-tight">0</div>
+            <div class="text-[11px] text-slate-400 mt-1.5">Early Warning (F3): <span id="kpiWarning" class="font-semibold text-amber-700">0 Mhs</span></div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Rerata Durasi TA (F4)</div>
+            <div class="flex items-baseline gap-1.5 mt-2">
+              <span id="kpiDurasiTA" class="text-3xl font-extrabold text-slate-900 tracking-tight">0</span>
+              <span class="text-sm font-bold text-slate-500">Bln</span>
+            </div>
+            <div class="text-[11px] text-slate-400 mt-1.5">Proyeksi Lulus (F5): <span id="kpiProyeksi" class="font-semibold text-slate-600">0%</span></div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Rasio Ulang MK (F8)</div>
+            <div id="kpiUlangMK" class="text-3xl font-extrabold text-slate-900 mt-2 tracking-tight">0%</div>
+            <div class="text-[11px] text-slate-400 mt-1.5">Antrian Alert WA (F9): <span id="kpiWAAlert" class="font-semibold text-amber-700">0 Mhs</span></div>
+          </div>
+        </div>
+        <div class="text-[11px] text-slate-400 pl-1">
+          Catatan: Mahasiswa berstatus cuti resmi dikecualikan dari peringatan keterlambatan aktif sesuai aturan akademik Unpad.
+        </div>
+      </section>
+
+      <!-- SECTION: RINGKASAN & STATUS -->
+      <section id="section-charts" class="space-y-3">
+        <div class="flex items-center gap-2">
+          <span class="w-1 h-4 gold-accent-bar rounded-full"></span>
+          <h2 class="text-sm font-extrabold text-slate-800">Ringkasan &amp; Status</h2>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 flex flex-col justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800">Komposisi Indeks AEE</h3>
+              <p class="text-xs text-slate-400 mt-0.5">Kontribusi bobot KTW, Masa Studi &amp; Progres TA</p>
+            </div>
+            <div class="flex items-center gap-4 my-4">
+              <div class="relative w-32 h-32 shrink-0">
+                <canvas id="chartKomposisiAEE"></canvas>
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <span id="donutCenterAEE" class="text-sm font-extrabold text-slate-800">0%</span>
+                </div>
+              </div>
+              <div id="legendKomposisiAEE" class="space-y-2 text-xs flex-1"></div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 flex flex-col justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800">Status Monitoring Mahasiswa</h3>
+              <p class="text-xs text-slate-400 mt-0.5">Normal / Lulus vs Warning vs Kritis Merah</p>
+            </div>
+            <div class="flex items-center gap-4 my-4">
+              <div class="relative w-32 h-32 shrink-0">
+                <canvas id="chartStatusMhs"></canvas>
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <span id="donutCenterTotal" class="text-sm font-extrabold text-slate-800">0</span>
+                </div>
+              </div>
+              <div id="legendStatusMhs" class="space-y-2 text-xs flex-1"></div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 flex flex-col justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800">Funnel Tahapan Tugas Akhir (F4)</h3>
+              <p class="text-xs text-slate-400 mt-0.5">Urutan progres dari Pengajuan Judul hingga Lulus</p>
+            </div>
+            <div id="funnelHorizontalBars" class="space-y-3 my-3">
+              <div class="text-xs text-slate-400">Memuat progres TA...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: MATRIKS STAGNASI & RED-FLAG MAHASISWA -->
+      <section id="section-tabel" class="space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="w-1 h-4 gold-accent-bar rounded-full"></span>
+            <h2 class="text-sm font-extrabold text-slate-800">Matriks Monitoring &amp; Red-Flag Mahasiswa (F2 &amp; F3)</h2>
+            <span id="tableCountBadge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full portal-pill">0 Data</span>
+          </div>
+
+          <div class="relative w-full sm:w-64">
+            <input type="text" id="searchMahasiswa" oninput="applyClientFilters()" placeholder="Cari NPM, Nama, atau Prodi..."
+              class="w-full text-xs bg-white border border-slate-200 rounded-xl pl-8 pr-3 py-2 focus:outline-none focus:border-[#E5A91A]">
+            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-[#F8F9FA] border-b border-slate-200 text-slate-500 uppercase text-[10px] tracking-wider">
+                  <th class="py-3.5 px-4 font-bold">NPM</th>
+                  <th class="py-3.5 px-4 font-bold">Nama Mahasiswa</th>
+                  <th class="py-3.5 px-4 font-bold">Program Studi &amp; Doswal</th>
+                  <th class="py-3.5 px-4 font-bold text-center">Posisi Studi</th>
+                  <th class="py-3.5 px-4 font-bold text-center">SKS</th>
+                  <th class="py-3.5 px-4 font-bold text-center">IPK</th>
+                  <th class="py-3.5 px-4 font-bold text-center">Tahap TA</th>
+                  <th class="py-3.5 px-4 font-bold text-center">Risk Index (Ri)</th>
+                  <th class="py-3.5 px-4 font-bold text-center">Status Visual</th>
+                  <th class="py-3.5 px-4 font-bold">Klarifikasi Doswal</th>
+                  <th id="thAdminAction" class="py-3.5 px-4 font-bold text-center hidden">Aksi Admin</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyMahasiswa" class="divide-y divide-slate-100 bg-white">
+                <tr>
+                  <td colspan="11" class="py-8 text-center text-slate-400">Memuat data akademik...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: LOG NOTIFIKASI WHATSAPP DOSEN WALI -->
+      <section id="section-wa" class="space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-1 h-4 gold-accent-bar rounded-full"></span>
+            <h2 class="text-sm font-extrabold text-slate-800">Antrian Peringatan Otomatis WhatsApp Dosen Wali (F9)</h2>
+          </div>
+          <span id="waSummaryBadge" class="text-[11px] font-bold px-3 py-1 rounded-full portal-pill">
+            0 Alert Aktif
+          </span>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+          <div id="waAlertList" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <div class="text-slate-400">Memeriksa antrian notifikasi...</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL 1: KLARIFIKASI DOSEN WALI -->
+  <div id="modalKlarifikasi" class="fixed inset-0 bg-slate-900/40 backdrop-blur-[1px] z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-[#FDF7E7]">
+        <div>
+          <span class="text-[10px] uppercase tracking-widest text-amber-800 font-bold">Form Intervensi Dosen Wali</span>
+          <h3 class="text-sm font-extrabold text-slate-900 mt-0.5">Klarifikasi Faktor Keterlambatan Studi</h3>
+        </div>
+        <button type="button" onclick="closeKlarifikasiModal()" class="text-slate-400 hover:text-slate-700 text-lg font-bold">&times;</button>
       </div>
 
-      <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-end">
-        <button onclick="closeModal()" class="px-4 py-2 bg-slate-700 text-white text-xs font-semibold rounded-lg">Tutup</button>
-      </div>
+      <form onsubmit="submitKlarifikasi(event)" class="p-5 space-y-4 text-xs">
+        <input type="hidden" id="klarifikasiNpm">
+        <div class="bg-[#F8F9FA] border border-slate-200 rounded-xl p-3">
+          <div class="text-slate-400 text-[11px]">Mahasiswa Perwalian:</div>
+          <div id="klarifikasiMhsInfo" class="font-bold text-slate-900 text-sm mt-0.5">-</div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1.5">Kategori Pemicu Utama Keterlambatan</label>
+          <select id="klarifikasiKategori" class="w-full bg-[#F8F9FA] border border-slate-200 rounded-xl px-3 py-2.5 text-slate-800 font-medium focus:outline-none focus:border-[#E5A91A]">
+            <option value="">-- Belum Ada Klarifikasi (Kosongkan) --</option>
+            <option value="Hambatan TA">Hambatan Riset / Revisi Tugas Akhir</option>
+            <option value="MK Prasyarat">Mata Kuliah Prasyarat Belum Lulus</option>
+            <option value="Finansial/Pribadi">Kendala Finansial / Kesehatan / Pribadi</option>
+            <option value="Jeda Registrasi">Jeda Registrasi / Cuti / Stopout</option>
+          </select>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeKlarifikasiModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50">
+            Batal
+          </button>
+          <button type="submit" class="px-4 py-2 rounded-xl gold-badge hover:brightness-95 font-extrabold">
+            Simpan Klarifikasi
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- ========================================================= -->
-  <!-- MODAL 2: EDIT DATA MAHASISWA (REVISI #1 - KHUSUS ADMIN)   -->
-  <!-- ========================================================= -->
-  <div id="modalEditMhs" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4" onclick="if(event.target.id==='modalEditMhs') closeEditModal()">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden border border-slate-200">
-      <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
+  <!-- MODAL 2: ADMIN EDIT DATA MAHASISWA -->
+  <div id="modalEditMahasiswa" class="fixed inset-0 bg-slate-900/40 backdrop-blur-[1px] z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-[#FDF7E7]">
         <div>
-          <h3 class="text-base font-bold">Edit Data Akademik Mahasiswa</h3>
-          <p id="editModalSubtitle" class="text-xs text-slate-300 font-mono mt-0.5">-</p>
+          <span class="text-[10px] uppercase tracking-widest text-amber-800 font-bold">Hak Akses Administrator</span>
+          <h3 class="text-sm font-extrabold text-slate-900 mt-0.5">Edit Data Akademik Mahasiswa</h3>
         </div>
-        <button onclick="closeEditModal()" class="text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+        <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 text-lg font-bold">&times;</button>
       </div>
 
-      <form onsubmit="submitEditMahasiswa(event)" class="p-6 space-y-4 text-xs max-h-[80vh] overflow-y-auto">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div class="sm:col-span-2">
-            <label class="block font-semibold text-slate-700 mb-1">Nama Lengkap Mahasiswa</label>
-            <input type="text" id="editNama" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-amber-600">
+      <form onsubmit="saveMahasiswa(event)" class="p-5 space-y-3.5 text-xs max-h-[85vh] overflow-y-auto">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">NPM</label>
+            <input type="text" id="editNpm" readonly class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-mono text-slate-600">
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Angkatan</label>
-            <input type="number" id="editAngkatan" min="2015" max="2030" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-amber-600">
+            <label class="block font-bold text-slate-600 mb-1">Angkatan</label>
+            <input type="number" id="editAngkatan" required class="w-full bg-[#F8F9FA] border border-slate-200 rounded-xl px-3 py-2 text-slate-800">
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Nama Lengkap Mahasiswa</label>
+          <input type="text" id="editNama" required class="w-full bg-[#F8F9FA] border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-semibold">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Status Studi</label>
-            <select id="editStatusStudi" onchange="onEditStatusChange()" class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-amber-600">
+            <label class="block font-bold text-slate-600 mb-1">Status Studi</label>
+            <select id="editStatusStudi" onchange="toggleEditStatusFields()" class="w-full bg-[#F8F9FA] border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-semibold">
               <option value="Aktif">Aktif</option>
               <option value="Lulus">Lulus</option>
               <option value="Cuti Resmi">Cuti Resmi</option>
               <option value="Mengundurkan Diri">Mengundurkan Diri</option>
-              <option value="Undur Diri">Undur Diri</option>
             </select>
           </div>
-          <div id="wrapEditSemAktif">
-            <label class="block font-semibold text-slate-700 mb-1">Semester Aktif (1–14)</label>
-            <input type="number" id="editSemAktif" min="1" max="14" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-amber-600">
+          <div id="wrapSemAktif">
+            <label class="block font-bold text-slate-600 mb-1">Semester Aktif (1–14)</label>
+            <input type="number" id="editSemAktif" min="1" max="14" class="w-full bg-[#F8F9FA] border border-slate-200 rounded-xl px-3 py-2 text-slate-800">
           </div>
-          <div id="wrapEditSemLulus" class="hidden">
-            <label class="block font-semibold text-emerald-700 mb-1">Semester Lulus (1–14)</label>
-            <input type="number" id="editSemLulus" min="1" max="14" class="w-full border border-emerald-400 bg-emerald-50/40 rounded-lg px-3 py-2 focus:outline-none focus:border-emerald-600">
+          <div id="wrapSemLulus" class="hidden">
+            <label class="block font-bold text-slate-600 mb-1">Lulus Pada Semester</label>
+            <input type="number" id="editSemLulus" min="6" max="14" class="w-full bg-[#F8F9FA] border border-slate-200 rounded-xl px-3 py-2 text-slate-800">
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">SKS Kumulatif</label>
-            <input type="number" id="editSKS" min="0" max="180" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-amber-600">
+            <label class="block font-bold text-slate-600 mb-1">SKS Kumulatif</label>
+            <input type="number" id="editSks" min="0" max="180" required class="w-full bg-[#F8F9FA] border border-slate-200 rounded-xl px-3 py-2 text-slate-800">
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">IPK (0.00 – 4.00)</label>
-            <input type="number" id="editIPK" step="0.01" min="0" max="4" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-amber-600">
+            <label class="block font-bold text-slate-600 mb-1">IPK (0.00 – 4.00)</label>
+            <input type="number" step="0.01" id="editIpk" min="0" max="4" required class="w-full bg-[#F8F9FA] border border-slate-200 rounded-xl px-3 py-2 text-slate-800">
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Tahap Tugas Akhir (TA)</label>
-            <select id="editStatusTA" onchange="onEditTAChange()" class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-amber-600">
-              <option value="">Belum TA</option>
+            <label class="block font-bold text-slate-600 mb-1">Tahap Tugas Akhir (TA)</label>
+            <select id="editStatusTA" class="w-full bg-[#F8F9FA] border border-slate-200 rounded-xl px-3 py-2 text-slate-800">
+              <option value="">Belum Mengambil TA</option>
               <option value="Pengajuan Judul">Pengajuan Judul</option>
-              <option value="SUR">SUR</option>
+              <option value="SUR">Seminar Usulan Riset (SUR)</option>
               <option value="Bimbingan">Bimbingan</option>
               <option value="Ujian Sidang">Ujian Sidang</option>
               <option value="Lulus">Lulus</option>
             </select>
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Progres TA (0 – 100%)</label>
-            <input type="number" id="editProgresTA" min="0" max="100" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-amber-600">
+            <label class="block font-bold text-slate-600 mb-1">Progres TA (%)</label>
+            <input type="number" id="editProgresTA" min="0" max="100" class="w-full bg-[#F8F9FA] border border-slate-200 rounded-xl px-3 py-2 text-slate-800">
           </div>
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Catatan Klarifikasi Keterlambatan</label>
-          <select id="editPemicu" class="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-amber-600">
-            <option value="">-- Kosong / Tidak Ada Kendala --</option>
-            <option value="Hambatan TA">Hambatan Tugas Akhir (TA)</option>
-            <option value="MK Prasyarat">Pengulangan MK Prasyarat</option>
-            <option value="Finansial/Pribadi">Kendala Finansial / Pribadi</option>
-            <option value="Stopout">Indikasi Stopout / Tidak Aktif</option>
+          <label class="block font-bold text-slate-600 mb-1">Klarifikasi Pemicu (Opsional)</label>
+          <select id="editKategoriPemicu" class="w-full bg-[#F8F9FA] border border-slate-200 rounded-xl px-3 py-2 text-slate-800">
+            <option value="">-- Tidak Ada --</option>
+            <option value="Hambatan TA">Hambatan TA</option>
+            <option value="MK Prasyarat">MK Prasyarat</option>
+            <option value="Finansial/Pribadi">Finansial/Pribadi</option>
+            <option value="Jeda Registrasi">Jeda Registrasi</option>
           </select>
         </div>
 
-        <div class="pt-3 border-t border-slate-200 flex justify-end gap-2">
-          <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg">Batal</button>
-          <button type="submit" class="px-5 py-2 bg-amber-700 hover:bg-amber-800 text-white font-semibold rounded-lg shadow-sm">Simpan Perubahan</button>
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50">
+            Batal
+          </button>
+          <button type="submit" id="btnSaveMhs" class="px-4 py-2 rounded-xl gold-badge hover:brightness-95 font-extrabold shadow-xs">
+            Simpan Perubahan
+          </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ========================================================= -->
-  <!-- MODAL 3: PENGATURAN RUMUS & BOBOT AEE (REVISI #2 - ADMIN) -->
-  <!-- ========================================================= -->
-  <div id="modalRumus" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4" onclick="if(event.target.id==='modalRumus') closeRumusModal()">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200">
-      <div class="bg-amber-900 text-white px-6 py-4 flex justify-between items-center">
+  <!-- MODAL 3: ADMIN PENGATURAN RUMUS & BOBOT AEE -->
+  <div id="modalParameters" class="fixed inset-0 bg-slate-900/40 backdrop-blur-[1px] z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-[#FDF7E7]">
         <div>
-          <h3 class="text-base font-bold">Pengaturan Rumus & Parameter Evaluasi AEE</h3>
-          <p class="text-xs text-amber-200 mt-0.5">Perubahan bobot dan ambang batas langsung menghitung ulang seluruh grafik & indeks</p>
+          <span class="text-[10px] uppercase tracking-widest text-amber-800 font-bold">Konfigurasi Engine Matematika</span>
+          <h3 class="text-sm font-extrabold text-slate-900 mt-0.5">Pengaturan Parameter &amp; Bobot Rumus AEE</h3>
         </div>
-        <button onclick="closeRumusModal()" class="text-amber-200 hover:text-white text-2xl font-bold">&times;</button>
+        <button type="button" onclick="closeParamModal()" class="text-slate-400 hover:text-slate-700 text-lg font-bold">&times;</button>
       </div>
 
-      <form onsubmit="submitRumusParameters(event)" class="p-6 space-y-5 text-xs max-h-[82vh] overflow-y-auto">
-        <!-- Bagian 1: Bobot Komponen Rumus F1 -->
-        <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-4 space-y-3">
+      <form onsubmit="saveParameters(event)" class="p-5 space-y-4 text-xs max-h-[85vh] overflow-y-auto">
+        <div id="paramErrorBox" class="hidden bg-rose-50 border border-rose-200 text-rose-700 px-3 py-2 rounded-xl font-semibold"></div>
+
+        <div class="bg-[#F8F9FA] border border-slate-200 rounded-xl p-4 space-y-3">
           <div class="flex items-center justify-between">
-            <h4 class="font-bold text-amber-950 uppercase tracking-wider text-[11px]">1. Bobot Komponen Indeks AEE (Rumus F1)</h4>
-            <span id="badgeTotalBobot" class="bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full text-[11px]">Total: 100%</span>
+            <span class="font-extrabold text-slate-800">1. Bobot Komponen Indeks AEE (Rumus F1)</span>
+            <span id="totalBobotLabel" class="font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Total: 100%</span>
           </div>
-          <p class="text-[11px] text-slate-600 font-mono bg-white px-3 py-1.5 rounded border border-amber-200">
-            AEE = ((KTW &times; W1) + (Efisiensi Masa Studi &times; W2) + (Progres TA &times; W3)) &times; 100%
-          </p>
           <div class="grid grid-cols-3 gap-3">
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Bobot KTW — W1 (%)</label>
-              <input type="number" id="paramW1" min="0" max="100" step="1" oninput="updateTotalBobotUI()" required class="w-full border border-slate-300 rounded-lg px-3 py-2 font-mono font-bold text-slate-800 bg-white">
+              <label class="block font-bold text-slate-500 mb-1">W1: KTW (%)</label>
+              <input type="number" id="inputW1" min="0" max="100" required oninput="updateBobotIndicator()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold">
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Bobot Masa Studi — W2 (%)</label>
-              <input type="number" id="paramW2" min="0" max="100" step="1" oninput="updateTotalBobotUI()" required class="w-full border border-slate-300 rounded-lg px-3 py-2 font-mono font-bold text-slate-800 bg-white">
+              <label class="block font-bold text-slate-500 mb-1">W2: Masa Studi (%)</label>
+              <input type="number" id="inputW2" min="0" max="100" required oninput="updateBobotIndicator()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold">
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Bobot Progres TA — W3 (%)</label>
-              <input type="number" id="paramW3" min="0" max="100" step="1" oninput="updateTotalBobotUI()" required class="w-full border border-slate-300 rounded-lg px-3 py-2 font-mono font-bold text-slate-800 bg-white">
+              <label class="block font-bold text-slate-500 mb-1">W3: Progres TA (%)</label>
+              <input type="number" id="inputW3" min="0" max="100" required oninput="updateBobotIndicator()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold">
             </div>
           </div>
         </div>
 
-        <!-- Bagian 2: Ambang Batas Semester & Akademik -->
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
-          <h4 class="font-bold text-slate-800 uppercase tracking-wider text-[11px]">2. Ambang Batas Semester, SKS & Early Warning (F2, F3, F5, F6)</h4>
+        <div class="bg-[#F8F9FA] border border-slate-200 rounded-xl p-4 space-y-3">
+          <span class="block font-extrabold text-slate-800">2. Standar Masa Studi &amp; Ambang Batas Peringatan (F2, F3, F6)</span>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Batas Normal S0 (Sem)</label>
-              <input type="number" id="paramS0" min="4" max="12" required class="w-full border border-slate-300 rounded-lg px-3 py-2 font-mono bg-white">
+              <label class="block font-bold text-slate-500 mb-1">Semester Normal (S0)</label>
+              <input type="number" id="inputS0" min="4" max="12" required class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono">
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Kritis Merah Min (Sem)</label>
-              <input type="number" id="paramKritisMin" min="5" max="14" required class="w-full border border-slate-300 rounded-lg px-3 py-2 font-mono bg-white">
+              <label class="block font-bold text-slate-500 mb-1">Awal Kritis Merah</label>
+              <input type="number" id="inputKritisMin" min="5" max="14" required class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono">
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Batas Studi Max (Sem)</label>
-              <input type="number" id="paramKritisMax" min="8" max="16" required class="w-full border border-slate-300 rounded-lg px-3 py-2 font-mono bg-white">
+              <label class="block font-bold text-slate-500 mb-1">Batas Maks Studi</label>
+              <input type="number" id="inputKritisMax" min="8" max="16" required class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono">
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Target SKS Lulus</label>
-              <input type="number" id="paramTargetSks" min="100" max="180" required class="w-full border border-slate-300 rounded-lg px-3 py-2 font-mono bg-white">
+              <label class="block font-bold text-slate-500 mb-1">Target SKS Lulus</label>
+              <input type="number" id="inputTargetSks" min="100" max="160" required class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono">
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">IPK Minimal Lulus</label>
-              <input type="number" id="paramIpkMin" step="0.05" min="1.0" max="4.0" required class="w-full border border-slate-300 rounded-lg px-3 py-2 font-mono bg-white">
+              <label class="block font-bold text-slate-500 mb-1">IPK Minimal</label>
+              <input type="number" step="0.05" id="inputIpkMin" min="1.5" max="3.5" required class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono">
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Ambang Risk Index (Ri)</label>
-              <input type="number" id="paramThresholdRi" step="0.05" min="0.1" max="3.0" required class="w-full border border-slate-300 rounded-lg px-3 py-2 font-mono bg-white">
+              <label class="block font-bold text-slate-500 mb-1">Ambang Risk Index (Ri)</label>
+              <input type="number" step="0.05" id="inputThresholdRi" min="0.5" max="2.0" required class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 font-mono">
             </div>
-          </div>
-          <div class="sm:w-1/2">
-            <label class="block font-semibold text-slate-700 mb-1">Ambang Progres TA Kritis di Semester Akhir (%)</label>
-            <input type="number" id="paramThresholdTa" min="0" max="100" step="5" required class="w-full border border-slate-300 rounded-lg px-3 py-2 font-mono bg-white">
           </div>
         </div>
 
-        <div class="pt-2 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-2">
-          <button type="button" onclick="resetDefaultRumus()" class="w-full sm:w-auto px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg">
-            Reset Default Unpad
+        <div class="flex items-center justify-between pt-2">
+          <button type="button" onclick="resetDefaultParams()" class="text-slate-500 hover:text-amber-800 font-bold underline">
+            Kembalikan Default Unpad (40/35/25)
           </button>
-          <div class="flex gap-2 w-full sm:w-auto justify-end">
-            <button type="button" onclick="closeRumusModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg">Batal</button>
-            <button type="submit" id="btnSimpanRumus" class="px-5 py-2 bg-amber-700 hover:bg-amber-800 text-white font-semibold rounded-lg shadow-sm">
-              Simpan & Hitung Ulang
+          <div class="flex gap-2">
+            <button type="button" onclick="closeParamModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50">
+              Batal
+            </button>
+            <button type="submit" id="btnSaveParam" class="px-4 py-2 rounded-xl gold-badge hover:brightness-95 font-extrabold">
+              Simpan &amp; Hitung Ulang
             </button>
           </div>
         </div>
@@ -422,20 +606,26 @@
   </div>
 
   <script>
-    const API_BASE = '/api';
     let currentUser = null;
-    let currentAnalyticsData = null;
-    let selectedModalNPM = null;
-    let editingNPM = null;
-    let chart1, chart2, chart3, chart4;
+    let allProdiList = [];
+    let latestAnalytics = null;
+    let chartAEEInstance = null;
+    let chartStatusInstance = null;
+    let sidebarExpanded = false;
 
     function checkAuth() {
-      const rawUser = localStorage.getItem('aee_user');
-      if (!rawUser) {
+      const raw = localStorage.getItem('aee_user');
+      if (!raw) {
         window.location.href = '/login.html';
         return null;
       }
-      return JSON.parse(rawUser);
+      try {
+        return JSON.parse(raw);
+      } catch (e) {
+        localStorage.removeItem('aee_user');
+        window.location.href = '/login.html';
+        return null;
+      }
     }
 
     function logout() {
@@ -443,526 +633,678 @@
       window.location.href = '/login.html';
     }
 
-    function formatSisaLebihSemester(semAktif, statusStudi, semNormal = 8, semMax = 14) {
-      if (statusStudi === 'Lulus') {
-        return `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded font-semibold">Sudah Lulus</span>`;
-      }
-      if (!semAktif || isNaN(semAktif) || semAktif < 1 || semAktif > semMax) {
-        return `<span class="bg-rose-50 text-rose-600 px-2 py-0.5 rounded font-mono">Data Tidak Valid</span>`;
-      }
+    function toggleSidebarExpand() {
+      sidebarExpanded = !sidebarExpanded;
+      const sb = document.getElementById('appSidebar');
+      const labels = document.querySelectorAll('.sidebar-label');
+      const icon = document.getElementById('sidebarToggleIcon');
 
-      const selisih = semAktif - semNormal;
-      if (selisih > 0) {
-        return `<span class="bg-rose-100 text-rose-800 border border-rose-300 px-2.5 py-0.5 rounded-full font-bold">Lebih +${selisih} Sem</span>`;
-      } else if (selisih === 0) {
-        return `<span class="bg-amber-100 text-amber-800 border border-amber-300 px-2.5 py-0.5 rounded-full font-semibold">Sisa 0 Sem (Batas)</span>`;
+      if (sidebarExpanded) {
+        sb.classList.remove('w-16');
+        sb.classList.add('w-56');
+        labels.forEach(l => l.classList.remove('hidden'));
+        icon.innerHTML = '&laquo;';
       } else {
-        const sisa = Math.abs(selisih);
-        return `<span class="bg-emerald-100 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full font-semibold">Sisa ${sisa} Sem</span>`;
+        sb.classList.remove('w-56');
+        sb.classList.add('w-16');
+        labels.forEach(l => l.classList.add('hidden'));
+        icon.innerHTML = '&raquo;';
       }
     }
 
-    async function initApp() {
+    function setActiveNav(el) {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('gold-badge', 'shadow-xs');
+        item.classList.add('text-slate-500', 'hover:bg-slate-100', 'hover:text-slate-900');
+        const svg = item.querySelector('svg');
+        if (svg) svg.classList.remove('text-white');
+      });
+      el.classList.add('gold-badge', 'shadow-xs');
+      el.classList.remove('text-slate-500', 'hover:bg-slate-100', 'hover:text-slate-900');
+      const activeSvg = el.querySelector('svg');
+      if (activeSvg) activeSvg.classList.add('text-white');
+    }
+
+    async function initDashboard() {
       currentUser = checkAuth();
       if (!currentUser) return;
 
-      document.getElementById('userNameDisplay').innerText = currentUser.nama_lengkap;
-      document.getElementById('userRoleBadge').innerText = `ROLE: ${currentUser.role.toUpperCase()}`;
+      const nama = currentUser.nama_lengkap || currentUser.username || 'Pengguna Unpad';
+      const role = (currentUser.role || 'admin').toLowerCase();
+      const initials = nama.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
 
-      // Tampilkan kontrol khusus Admin (Revisi #1 & #2)
-      if (currentUser.role === 'admin') {
-        document.getElementById('btnOpenRumus').classList.remove('hidden');
-        document.getElementById('btnBannerRumus').classList.remove('hidden');
-        document.getElementById('thAksiAdmin').classList.remove('hidden');
+      document.getElementById('headerUserName').innerText = nama;
+      document.getElementById('headerUserRole').innerText = role.toUpperCase();
+      document.getElementById('userAvatarInitial').innerText = initials || 'UP';
+
+      let scopeText = 'Semua Fakultas (Universitas)';
+      if (role === 'dekan') scopeText = currentUser.nama_fakultas || `Fakultas ${currentUser.kode_fakultas}`;
+      else if (role === 'prodi') scopeText = currentUser.nama_prodi || `Prodi ${currentUser.kode_prodi}`;
+      else if (role === 'dosen') scopeText = `Perwalian • ${nama}`;
+      document.getElementById('scopeUnitPill').innerText = scopeText;
+
+      if (role === 'admin') {
+        document.getElementById('btnHeaderParam').classList.remove('hidden');
+        document.getElementById('btnHeaderParam').classList.add('inline-flex');
+        document.getElementById('sidebarBtnParam').classList.remove('hidden');
+        document.getElementById('sidebarBtnParam').classList.add('flex');
+        document.getElementById('thAdminAction').classList.remove('hidden');
       }
 
-      await Promise.all([loadMasterDropdowns(), loadRekapFakultas()]);
-
-      const selFak = document.getElementById('selectFakultas');
-      const selProdi = document.getElementById('selectProdi');
-      const selDoswal = document.getElementById('selectDoswal');
-
-      if (currentUser.role === 'dekan' && currentUser.kode_fakultas) {
-        selFak.value = currentUser.kode_fakultas;
-        selFak.disabled = true;
-        document.getElementById('headerSubtitle').innerText = `Dashboard Dekan — Fakultas ${currentUser.nama_fakultas || currentUser.kode_fakultas}`;
-      } else if (currentUser.role === 'prodi' && currentUser.kode_prodi) {
-        selFak.value = currentUser.kode_fakultas || '';
-        selFak.disabled = true;
-        selProdi.value = currentUser.kode_prodi;
-        selProdi.disabled = true;
-        document.getElementById('headerSubtitle').innerText = `Dashboard Ketua Program Studi — ${currentUser.nama_prodi || currentUser.kode_prodi}`;
-      } else if (currentUser.role === 'dosen') {
-        selFak.value = currentUser.kode_fakultas || '';
-        selFak.disabled = true;
-        selProdi.value = currentUser.kode_prodi || '';
-        selProdi.disabled = true;
-        selDoswal.value = currentUser.id;
-        selDoswal.disabled = true;
-        document.getElementById('headerSubtitle').innerText = `Dashboard Dosen Wali — Mahasiswa Perwalian ${currentUser.nama_lengkap}`;
-      }
-
-      onFilterChange();
+      await loadMasterFilters();
+      await fetchAnalytics();
     }
 
-    async function loadMasterDropdowns() {
-      const [resFak, resProdi, resDoswal] = await Promise.all([
-        fetch(`${API_BASE}/fakultas`).then(r => r.json()),
-        fetch(`${API_BASE}/prodi`).then(r => r.json()),
-        fetch(`${API_BASE}/dosen-wali`).then(r => r.json())
-      ]);
+    async function loadMasterFilters() {
+      try {
+        const [resFak, resProdi] = await Promise.all([
+          fetch('/api/fakultas').then(r => r.json()),
+          fetch('/api/prodi').then(r => r.json())
+        ]);
 
-      if (resFak.success) {
-        const selFak = document.getElementById('selectFakultas');
-        resFak.data.forEach(f => selFak.innerHTML += `<option value="${f.kode}">${f.kode} - ${f.nama}</option>`);
-      }
-      if (resProdi.success) {
-        const selProdi = document.getElementById('selectProdi');
-        selProdi.innerHTML += `<option value="9901">9901 - Teknik Informatika (Cohort Excel)</option>`;
-        resProdi.data.forEach(p => selProdi.innerHTML += `<option value="${p.kode}">${p.kode} - ${p.nama} (${p.jenjang})</option>`);
-      }
-      if (resDoswal.success) {
-        const selDoswal = document.getElementById('selectDoswal');
-        resDoswal.data.forEach(d => selDoswal.innerHTML += `<option value="${d.id}">${d.nama_lengkap} (${d.total_bimbingan} Mhs)</option>`);
-      }
-    }
+        const selFak = document.getElementById('filterFakultas');
+        const selProdi = document.getElementById('filterProdi');
 
-    async function loadRekapFakultas() {
-      const kodeFak = currentUser.role !== 'admin' ? currentUser.kode_fakultas : '';
-      const url = kodeFak ? `${API_BASE}/rekap-fakultas?kodeFakultas=${kodeFak}` : `${API_BASE}/rekap-fakultas`;
-      const res = await fetch(url).then(r => r.json());
+        if (resFak.success && Array.isArray(resFak.data)) {
+          selFak.innerHTML = '<option value="">Semua Fakultas</option>' +
+            resFak.data.map(f => `<option value="${f.kode}">${f.kode} — ${f.nama}</option>`).join('');
+        }
 
-      if (res.success) {
-        const grid = document.getElementById('gridRekapFakultas');
-        let totalAll = 0;
-        grid.innerHTML = res.data.map(f => {
-          totalAll += parseInt(f.total_prodi, 10);
-          return `
-            <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5">
-              <span class="font-bold text-amber-800 block">${f.kode}</span>
-              <span class="text-slate-600 text-[10px] line-clamp-1" title="${f.nama}">${f.nama}</span>
-              <div class="mt-1.5 flex items-center justify-between text-[10px] font-mono">
-                <span class="bg-emerald-100 text-emerald-800 px-1.5 rounded">S1:${f.total_s1}</span>
-                <span class="bg-sky-100 text-sky-800 px-1.5 rounded">D4:${f.total_d4}</span>
-              </div>
-            </div>
-          `;
-        }).join('');
-        document.getElementById('badgeTotalProdi').innerText = `Total: ${totalAll} Program Studi`;
+        if (resProdi.success && Array.isArray(resProdi.data)) {
+          allProdiList = resProdi.data;
+          populateProdiDropdown('');
+        }
+
+        const role = (currentUser.role || '').toLowerCase();
+        if (role === 'dekan' && currentUser.kode_fakultas) {
+          selFak.value = currentUser.kode_fakultas;
+          selFak.disabled = true;
+          populateProdiDropdown(currentUser.kode_fakultas);
+        } else if ((role === 'prodi' || role === 'dosen') && currentUser.kode_prodi) {
+          if (currentUser.kode_fakultas) {
+            selFak.value = currentUser.kode_fakultas;
+            selFak.disabled = true;
+            populateProdiDropdown(currentUser.kode_fakultas);
+          }
+          selProdi.value = currentUser.kode_prodi;
+          selProdi.disabled = true;
+        }
+      } catch (err) {
+        console.error('Gagal memuat master filter:', err);
       }
     }
 
-    async function onFilterChange() {
-      const kodeFak = document.getElementById('selectFakultas').value;
-      const kodeProdi = document.getElementById('selectProdi').value;
-      const doswalId = document.getElementById('selectDoswal').value;
+    function populateProdiDropdown(kodeFakultas) {
+      const selProdi = document.getElementById('filterProdi');
+      const filtered = kodeFakultas
+        ? allProdiList.filter(p => p.kode_fakultas === kodeFakultas)
+        : allProdiList;
 
+      selProdi.innerHTML = '<option value="">Semua Program Studi</option>' +
+        filtered.map(p => `<option value="${p.kode}">${p.nama} (${p.jenjang || 'S1'})</option>`).join('');
+    }
+
+    function onFilterFakultasChange() {
+      const kodeFak = document.getElementById('filterFakultas').value;
+      populateProdiDropdown(kodeFak);
+      fetchAnalytics();
+    }
+
+    function resetFilters() {
+      const role = (currentUser.role || '').toLowerCase();
+      if (role === 'admin') {
+        document.getElementById('filterFakultas').value = '';
+        populateProdiDropdown('');
+        document.getElementById('filterProdi').value = '';
+      } else if (role === 'dekan') {
+        document.getElementById('filterProdi').value = '';
+      }
+      document.getElementById('filterAngkatan').value = '';
+      document.getElementById('filterStatusVisual').value = '';
+      document.getElementById('searchMahasiswa').value = '';
+      fetchAnalytics();
+    }
+
+    async function fetchAnalytics() {
       const params = new URLSearchParams();
-      if (kodeFak) params.append('kodeFakultas', kodeFak);
-      if (kodeProdi) params.append('kodeProdi', kodeProdi);
-      if (doswalId) params.append('dosenWaliId', doswalId);
+      const role = (currentUser.role || '').toLowerCase();
+      const kodeFak = document.getElementById('filterFakultas').value;
+      const kodeProdi = document.getElementById('filterProdi').value;
 
-      const res = await fetch(`${API_BASE}/aee/analytics?${params.toString()}`).then(r => r.json());
-      if (res.success) {
-        currentAnalyticsData = res;
-        const s = res.executiveSummary;
-        const p = res.activeParameters || { w1_ktw: 0.4, w2_masa_studi: 0.35, w3_progres_ta: 0.25, s0_normal: 8, batas_kritis_min: 9, batas_kritis_max: 14, target_sks: 144, threshold_ri: 1.0 };
+      if (kodeProdi) params.set('kodeProdi', kodeProdi);
+      else if (kodeFak) params.set('kodeFakultas', kodeFak);
 
-        document.getElementById('cardAEE').innerText = `${s.indeksAEEPersen}%`;
-        document.getElementById('cardMerah').innerText = s.totalMhsKritisMerah;
-        document.getElementById('cardKuning').innerText = s.peringatanDiniAktif;
-        document.getElementById('cardKTW').innerText = `${s.ktwPersen}%`;
+      if (role === 'dosen' && currentUser.id) {
+        params.set('dosenWaliId', currentUser.id);
+      }
 
-        // Update label dinamis mengikuti parameter aktif
-        document.getElementById('labelCardMerah').innerText = `Mhs Kritis (Lebih > ${p.s0_normal} Sem)`;
-        document.getElementById('subCardKuning').innerText = `Rumus F3 (Ri ≥ ${p.threshold_ri} / Sem Akhir)`;
-        document.getElementById('subCardKTW').innerText = `Rumus F6 (Lulus ≤ ${p.s0_normal} Semester)`;
-        document.getElementById('subtitleTabelMhs').innerText = `Menghitung selisih terhadap batas studi normal ${p.s0_normal} semester (Klik nama mahasiswa untuk detail & klarifikasi)`;
+      try {
+        const res = await fetch(`/api/aee/analytics?${params.toString()}`).then(r => r.json());
+        if (!res.success) throw new Error(res.message || 'Gagal memuat analytics');
 
-        const w1Pct = Math.round(p.w1_ktw * 100);
-        const w2Pct = Math.round(p.w2_masa_studi * 100);
-        const w3Pct = Math.round(p.w3_progres_ta * 100);
-        document.getElementById('activeFormulaBanner').innerText =
-          `Bobot F1: KTW ${w1Pct}% • Masa Studi ${w2Pct}% • Progres TA ${w3Pct}% | Normal S0: ${p.s0_normal} Sem | Kritis: Sem ${p.batas_kritis_min}–${p.batas_kritis_max} | Target SKS: ${p.target_sks}`;
-
-        renderCharts(res.detailRumus, p);
-        renderTable(res.rawMahasiswa, res.detailRumus, p);
+        latestAnalytics = res;
+        renderDashboard(res);
+      } catch (err) {
+        console.error('Error fetchAnalytics:', err);
+        document.getElementById('tbodyMahasiswa').innerHTML =
+          `<tr><td colspan="11" class="py-8 text-center text-rose-600 font-semibold">Gagal memuat data: ${err.message}</td></tr>`;
       }
     }
 
-    function renderCharts(detail, p) {
-      if (chart1) chart1.destroy();
-      if (chart2) chart2.destroy();
-      if (chart3) chart3.destroy();
-      if (chart4) chart4.destroy();
+    function renderDashboard(data) {
+      const p = data.activeParameters || {};
+      const exec = data.executiveSummary || {};
+      const f1 = data.detailRumus?.F1_AEE || {};
+      const f2 = data.detailRumus?.F2_RedFlag || {};
+      const f3 = data.detailRumus?.F3_EarlyWarning || {};
+      const f4 = data.detailRumus?.F4_DurasiTA || {};
+      const f8 = data.detailRumus?.F8_Pengulangan || {};
+      const f9 = data.detailRumus?.F9_Notifikasi || {};
+      const mhsList = data.rawMahasiswa || [];
 
-      const w1 = Number(p.w1_ktw || 0.40);
-      const w2 = Number(p.w2_masa_studi || 0.35);
-      const w3 = Number(p.w3_progres_ta || 0.25);
+      const w1Pct = Math.round((p.w1_ktw || 0.4) * 100);
+      const w2Pct = Math.round((p.w2_masa_studi || 0.35) * 100);
+      const w3Pct = Math.round((p.w3_progres_ta || 0.25) * 100);
+      document.getElementById('activeParamBadge').innerText =
+        `Bobot: ${w1Pct}% / ${w2Pct}% / ${w3Pct}% • S0: ${p.s0_normal || 8} Sem`;
 
-      const f1Komp = detail.F1_AEE.komponen || {};
-      chart1 = new Chart(document.getElementById('chartIndeksAEE'), {
-        type: 'doughnut',
-        data: {
-          labels: [
-            `KTW (${Math.round(w1 * 100)}%)`,
-            `Efisiensi Masa Studi (${Math.round(w2 * 100)}%)`,
-            `Progres TA (${Math.round(w3 * 100)}%)`
-          ],
-          datasets: [{
-            data: [
-              ((f1Komp.ktwRatio || 0) * w1 * 100).toFixed(2),
-              ((f1Komp.efisiensiMasaStudi || 0) * w2 * 100).toFixed(2),
-              ((f1Komp.progresTARatio || 0) * w3 * 100).toFixed(2)
-            ],
-            backgroundColor: ['#10b981', '#d97706', '#0284c7']
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-      });
+      document.getElementById('kpiAEE').innerText = `${exec.indeksAEEPersen ?? 0}%`;
+      document.getElementById('kpiKTW').innerText = `${exec.ktwPersen ?? 0}%`;
+      document.getElementById('kpiKTWBadge').innerText = `≤ ${p.s0_normal || 8} Sem`;
+      document.getElementById('kpiMasaStudi').innerText = exec.rataRataMasaStudiTahun ?? 0;
+      document.getElementById('kpiMerah').innerText = exec.totalMhsKritisMerah ?? 0;
+      document.getElementById('kpiWarning').innerText = `${exec.peringatanDiniAktif ?? 0} Mhs`;
+      document.getElementById('kpiDurasiTA').innerText = exec.rataRataDurasiTABulan ?? 0;
+      document.getElementById('kpiProyeksi').innerText = `${exec.proyeksiKelulusanPersen ?? 0}%`;
+      document.getElementById('kpiUlangMK').innerText = `${f8.rasioPengulanganPersen ?? 0}%`;
+      document.getElementById('kpiWAAlert').innerText = `${exec.totalWANotifikasiTerkirim ?? 0} Mhs`;
 
-      const f2Sum = detail.F2_RedFlag.summary || {};
-      const f3Sum = detail.F3_EarlyWarning.summary || {};
-      chart2 = new Chart(document.getElementById('chartTrenKeterlambatan'), {
-        type: 'doughnut',
-        data: {
-          labels: ['Hijau (Aman)', 'Kuning (Warning)', `Merah (Lebih > ${p.s0_normal} Sem)`, 'Abu (Cuti Resmi)'],
-          datasets: [{
-            data: [Math.max(0, f2Sum.totalHijau - f3Sum.totalBadgeKuning), f3Sum.totalBadgeKuning, f2Sum.totalMerahKritis, f2Sum.totalCutiAbu],
-            backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#94a3b8']
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-      });
+      const angkatanSet = [...new Set(mhsList.map(m => m.angkatan).filter(Boolean))].sort((a, b) => b - a);
+      const selAngkatan = document.getElementById('filterAngkatan');
+      const prevAng = selAngkatan.value;
+      selAngkatan.innerHTML = '<option value="">Semua Angkatan</option>' +
+        angkatanSet.map(a => `<option value="${a}">${a}</option>`).join('');
+      if (prevAng && angkatanSet.includes(Number(prevAng))) selAngkatan.value = prevAng;
 
-      const f5 = detail.F5_Proyeksi || {};
-      chart3 = new Chart(document.getElementById('chartProyeksiKelulusan'), {
-        type: 'bar',
-        data: {
-          labels: ['Sudah Lulus', 'Proyeksi Wisuda', 'Total Proyeksi', 'Total Cohort'],
-          datasets: [{ data: [f5.sudahLulus || 0, f5.proyeksiWisudaMendatang || 0, f5.totalProyeksiLulus || 0, f5.N_Cohort || 0], backgroundColor: ['#059669', '#3b82f6', '#d97706', '#64748b'] }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-      });
-
-      const funnel = detail.F4_DurasiTA.funnel || [];
-      chart4 = new Chart(document.getElementById('chartProgresTA'), {
-        type: 'bar',
-        data: {
-          labels: funnel.map(f => f.tahap),
-          datasets: [{ data: funnel.map(f => f.jumlahMahasiswa), backgroundColor: ['#38bdf8', '#0284c7', '#0369a1', '#075985', '#0c4a6e'] }]
-        },
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-      });
+      renderRingkasanVisual(f1, f2, f3, f4, p, mhsList);
+      applyClientFilters();
+      renderWAAlerts(f9);
     }
 
-    function renderTable(mhsList, detailRumus, p) {
-      const tbody = document.getElementById('tableMahasiswaBody');
-      const isAdmin = currentUser && currentUser.role === 'admin';
-      const colSpan = isAdmin ? 10 : 9;
+    function renderRingkasanVisual(f1, f2, f3, f4, p, mhsList) {
+      const komp = f1.komponen || {};
+      const w1 = p.w1_ktw || 0.40;
+      const w2 = p.w2_masa_studi || 0.35;
+      const w3 = p.w3_progres_ta || 0.25;
 
-      if (!mhsList.length) {
-        tbody.innerHTML = `<tr><td colspan="${colSpan}" class="text-center py-6 text-slate-400">Tidak ada data mahasiswa untuk filter ini.</td></tr>`;
+      const c1 = Number(((komp.ktwRatio || 0) * w1 * 100).toFixed(1));
+      const c2 = Number(((komp.efisiensiMasaStudi || 0) * w2 * 100).toFixed(1));
+      const c3 = Number(((komp.progresTARatio || 0) * w3 * 100).toFixed(1));
+      const totalAEE = Number((c1 + c2 + c3).toFixed(1));
+
+      document.getElementById('donutCenterAEE').innerText = `${totalAEE}%`;
+
+      const ctx1 = document.getElementById('chartKomposisiAEE').getContext('2d');
+      if (chartAEEInstance) chartAEEInstance.destroy();
+      chartAEEInstance = new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+          labels: ['KTW (W1)', 'Masa Studi (W2)', 'Progres TA (W3)'],
+          datasets: [{
+            data: [c1, c2, c3],
+            backgroundColor: ['#D4B445', '#D9825B', '#475569'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '72%',
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      document.getElementById('legendKomposisiAEE').innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="flex items-center gap-2 text-slate-600"><span class="w-2.5 h-2.5 rounded-full bg-[#D4B445]"></span>KTW (${Math.round(w1 * 100)}%)</span>
+          <span class="font-bold text-slate-800">${c1}%</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="flex items-center gap-2 text-slate-600"><span class="w-2.5 h-2.5 rounded-full bg-[#D9825B]"></span>Masa Studi (${Math.round(w2 * 100)}%)</span>
+          <span class="font-bold text-slate-800">${c2}%</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="flex items-center gap-2 text-slate-600"><span class="w-2.5 h-2.5 rounded-full bg-[#475569]"></span>Progres TA (${Math.round(w3 * 100)}%)</span>
+          <span class="font-bold text-slate-800">${c3}%</span>
+        </div>
+      `;
+
+      const countLulus = mhsList.filter(m => m.status_studi === 'Lulus').length;
+      const countMerah = f2.summary?.totalMerahKritis || 0;
+      const countKuning = f3.summary?.totalBadgeKuning || 0;
+      const countAman = Math.max(0, mhsList.length - countLulus - countMerah - countKuning);
+      const totalMhs = mhsList.length;
+
+      document.getElementById('donutCenterTotal').innerText = totalMhs;
+
+      const ctx2 = document.getElementById('chartStatusMhs').getContext('2d');
+      if (chartStatusInstance) chartStatusInstance.destroy();
+      chartStatusInstance = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ['Lulus / Normal', 'Warning Kuning', 'Kritis Merah'],
+          datasets: [{
+            data: [countLulus + countAman, countKuning, countMerah],
+            backgroundColor: ['#D4B445', '#F59E0B', '#D9825B'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '72%',
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      const pctAman = totalMhs > 0 ? (((countLulus + countAman) / totalMhs) * 100).toFixed(1) : '0.0';
+      const pctKuning = totalMhs > 0 ? ((countKuning / totalMhs) * 100).toFixed(1) : '0.0';
+      const pctMerah = totalMhs > 0 ? ((countMerah / totalMhs) * 100).toFixed(1) : '0.0';
+
+      document.getElementById('legendStatusMhs').innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="flex items-center gap-2 text-slate-600"><span class="w-2.5 h-2.5 rounded-full bg-[#D4B445]"></span>Lulus &amp; Aman</span>
+          <span class="font-bold text-slate-800">${countLulus + countAman} (${pctAman}%)</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="flex items-center gap-2 text-slate-600"><span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>Early Warning</span>
+          <span class="font-bold text-slate-800">${countKuning} (${pctKuning}%)</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="flex items-center gap-2 text-slate-600"><span class="w-2.5 h-2.5 rounded-full bg-[#D9825B]"></span>Kritis Merah</span>
+          <span class="font-bold text-slate-800">${countMerah} (${pctMerah}%)</span>
+        </div>
+      `;
+
+      const funnel = f4.funnel || [];
+      const maxVal = Math.max(1, ...funnel.map(item => item.jumlahMahasiswa || 0));
+      const barContainer = document.getElementById('funnelHorizontalBars');
+
+      if (funnel.length === 0) {
+        barContainer.innerHTML = '<div class="text-xs text-slate-400">Belum ada data tahapan TA.</div>';
         return;
       }
 
-      const rfMap = new Map((detailRumus.F2_RedFlag.detail || []).map(i => [i.npm, i]));
-      const ewMap = new Map((detailRumus.F3_EarlyWarning.detail || []).map(i => [i.npm, i]));
+      barContainer.innerHTML = funnel.map(item => {
+        const widthPct = Math.round(((item.jumlahMahasiswa || 0) / maxVal) * 100);
+        return `
+          <div class="grid grid-cols-12 items-center gap-2 text-xs">
+            <div class="col-span-4 text-slate-600 font-medium truncate" title="${item.tahap}">${item.tahap}</div>
+            <div class="col-span-6 bg-slate-100 h-2.5 rounded-full overflow-hidden">
+              <div class="h-full rounded-full bg-[#D4B445] transition-all duration-500" style="width: ${widthPct}%"></div>
+            </div>
+            <div class="col-span-2 text-right font-mono font-bold text-slate-700">${item.jumlahMahasiswa}</div>
+          </div>
+        `;
+      }).join('');
+    }
 
-      tbody.innerHTML = mhsList.map(m => {
-        const rf = rfMap.get(m.npm) || {};
-        const ew = ewMap.get(m.npm) || {};
+    function applyClientFilters() {
+      if (!latestAnalytics) return;
 
-        let badgeStyle = 'bg-slate-100 text-slate-600';
-        let labelText = m.status_studi === 'Lulus' ? 'LULUS' : (rf.colorStatus || 'Hijau');
+      const mhsList = latestAnalytics.rawMahasiswa || [];
+      const f2Detail = latestAnalytics.detailRumus?.F2_RedFlag?.detail || [];
+      const f3Detail = latestAnalytics.detailRumus?.F3_EarlyWarning?.detail || [];
+      const s0 = latestAnalytics.activeParameters?.s0_normal || 8;
 
-        if (m.status_studi === 'Lulus') badgeStyle = 'bg-emerald-100 text-emerald-800 font-semibold';
-        else if (rf.colorStatus === 'Merah') { badgeStyle = 'bg-rose-100 text-rose-700 font-semibold'; labelText = 'MERAH (Kritis)'; }
-        else if (rf.colorStatus === 'Cuti Resmi (Abu)') { badgeStyle = 'bg-slate-200 text-slate-700'; labelText = 'Abu (Cuti)'; }
-        else if (ew.badgeColor === 'Kuning') { badgeStyle = 'bg-amber-100 text-amber-800 font-semibold'; labelText = 'KUNING (Warning)'; }
-        else if (rf.colorStatus === 'Hijau') { badgeStyle = 'bg-emerald-100 text-emerald-700'; labelText = 'HIJAU (Aman)'; }
+      const f2Map = new Map(f2Detail.map(d => [d.npm, d]));
+      const f3Map = new Map(f3Detail.map(d => [d.npm, d]));
 
-        const aksiCell = isAdmin
-          ? `<td class="px-4 py-3 text-center">
-              <button onclick="openEditModal('${m.npm}')" class="bg-amber-100 hover:bg-amber-700 text-amber-900 hover:text-white border border-amber-300 font-semibold px-2.5 py-1 rounded-md text-[11px] transition">
-                Edit
-              </button>
+      const filterAng = document.getElementById('filterAngkatan').value;
+      const filterStatus = document.getElementById('filterStatusVisual').value;
+      const keyword = document.getElementById('searchMahasiswa').value.trim().toLowerCase();
+      const isAdmin = (currentUser.role || '').toLowerCase() === 'admin';
+
+      const enriched = mhsList.map(m => {
+        const d2 = f2Map.get(m.npm);
+        const d3 = f3Map.get(m.npm);
+
+        let visualCategory = 'Hijau';
+        if (m.status_studi === 'Lulus') visualCategory = 'Lulus';
+        else if (d2?.colorStatus === 'ERROR') visualCategory = 'ERROR';
+        else if (m.status_studi === 'Cuti Resmi') visualCategory = 'Cuti';
+        else if (d2?.colorStatus === 'Merah') visualCategory = 'Merah';
+        else if (d3?.badgeColor === 'Kuning') visualCategory = 'Kuning';
+
+        return { ...m, d2, d3, visualCategory };
+      });
+
+      const filtered = enriched.filter(m => {
+        if (filterAng && String(m.angkatan) !== filterAng) return false;
+        if (filterStatus && m.visualCategory !== filterStatus) return false;
+        if (keyword) {
+          const hay = `${m.npm} ${m.nama} ${m.nama_prodi || ''} ${m.nama_fakultas || ''}`.toLowerCase();
+          if (!hay.includes(keyword)) return false;
+        }
+        return true;
+      });
+
+      document.getElementById('tableCountBadge').innerText = `${filtered.length} Mahasiswa`;
+
+      const tbody = document.getElementById('tbodyMahasiswa');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="py-8 text-center text-slate-400">Tidak ada data mahasiswa yang sesuai dengan filter.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(m => {
+        const sem = parseInt(m.semester_aktif, 10);
+        const isMerah = m.visualCategory === 'Merah';
+        const isError = m.visualCategory === 'ERROR';
+        const rowBg = isMerah ? 'bg-rose-50/70 hover:bg-rose-100/60' : 'hover:bg-[#F8F9FA]';
+
+        let posisiBadge = '';
+        if (m.status_studi === 'Lulus') {
+          posisiBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Lulus (Sem ${m.semester_lulus || '-'})</span>`;
+        } else if (m.status_studi === 'Cuti Resmi') {
+          posisiBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600">Cuti (Sem ${sem || '-'})</span>`;
+        } else if (m.status_studi === 'Mengundurkan Diri') {
+          posisiBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-200 text-slate-700">Mengundurkan Diri</span>`;
+        } else if (isError) {
+          posisiBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700">Data Tidak Valid</span>`;
+        } else if (sem > s0) {
+          posisiBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800">Lebih +${sem - s0} Sem</span>`;
+        } else {
+          posisiBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold portal-pill">Semester ${sem}</span>`;
+        }
+
+        let statusVisualBadge = '';
+        if (m.status_studi === 'Lulus') {
+          statusVisualBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-600 text-white">LULUS</span>`;
+        } else if (isError) {
+          statusVisualBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-200 text-slate-700">ERROR</span>`;
+        } else if (m.visualCategory === 'Merah') {
+          statusVisualBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-rose-600 text-white">MERAH (Kritis)</span>`;
+        } else if (m.visualCategory === 'Kuning') {
+          statusVisualBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold gold-badge">KUNING (Warning)</span>`;
+        } else if (m.visualCategory === 'Cuti') {
+          statusVisualBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-500 text-white">ABU (Cuti)</span>`;
+        } else {
+          statusVisualBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">HIJAU (Aman)</span>`;
+        }
+
+        const riVal = m.d3 && m.d3.riskIndex !== null && m.d3.riskIndex !== undefined
+          ? `<span class="font-mono font-bold ${m.d3.riskIndex >= 1 ? 'text-rose-700' : 'text-slate-700'}">${Number(m.d3.riskIndex).toFixed(2)}</span>`
+          : '-';
+
+        const taBadge = m.status_ta
+          ? `<span class="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 font-semibold text-[11px]">${m.status_ta}</span>`
+          : '<span class="text-slate-400">-</span>';
+
+        const klarifikasiCell = m.kategori_pemicu
+          ? `<button type="button" onclick="openKlarifikasiModal('${m.npm}')" class="text-left group">
+               <span class="px-2.5 py-0.5 rounded-lg portal-pill font-bold text-[11px] group-hover:brightness-95">${m.kategori_pemicu}</span>
+             </button>`
+          : (m.status_studi !== 'Lulus'
+              ? `<button type="button" onclick="openKlarifikasiModal('${m.npm}')" class="text-[11px] text-amber-800 hover:underline font-semibold">+ Isi Klarifikasi</button>`
+              : '<span class="text-slate-400">-</span>');
+
+        const adminCol = isAdmin
+          ? `<td class="py-3 px-4 text-center">
+               <button type="button" onclick="openEditModal('${m.npm}')"
+                 class="px-3 py-1 rounded-lg gold-badge hover:brightness-95 font-extrabold text-[11px] shadow-xs transition">
+                 Edit
+               </button>
              </td>`
           : '';
 
         return `
-          <tr class="hover:bg-slate-50 transition-colors">
-            <td class="px-4 py-3 font-mono font-medium text-slate-900">${m.npm}</td>
-            <td class="px-4 py-3 font-semibold text-amber-700 hover:underline cursor-pointer" onclick="openModal('${m.npm}')">${m.nama}</td>
-            <td class="px-4 py-3">
-              <span class="block text-slate-700 font-medium">${m.nama_prodi}</span>
-              <span class="text-[10px] text-slate-400">Doswal: ${m.nama_dosen_wali || '-'}</span>
+          <tr class="${rowBg} transition">
+            <td class="py-3 px-4 font-mono font-semibold text-slate-600 whitespace-nowrap">${m.npm}</td>
+            <td class="py-3 px-4">
+              <div class="font-bold text-slate-900">${m.nama}</div>
+              <div class="text-[10px] text-slate-400">Angkatan ${m.angkatan || '-'}</div>
             </td>
-            <td class="px-4 py-3 text-center">${formatSisaLebihSemester(m.semester_aktif, m.status_studi, p.s0_normal, p.batas_kritis_max)}</td>
-            <td class="px-4 py-3 text-center font-medium">${m.sks_kumulatif}</td>
-            <td class="px-4 py-3 text-center font-mono">${m.ipk}</td>
-            <td class="px-4 py-3 text-center"><span class="bg-sky-50 text-sky-700 px-2 py-0.5 rounded text-[11px]">${m.status_ta || 'Belum TA'}</span></td>
-            <td class="px-4 py-3 text-center font-mono">${ew.riskIndex ?? '-'}</td>
-            <td class="px-4 py-3 text-center"><span class="px-2.5 py-1 rounded-full text-[11px] ${badgeStyle}">${labelText}</span></td>
-            ${aksiCell}
+            <td class="py-3 px-4">
+              <div class="font-semibold text-slate-800">${m.nama_prodi || m.kode_prodi}</div>
+              <div class="text-[10px] text-slate-400">Doswal: ${m.nama_dosen_wali || '-'}</div>
+            </td>
+            <td class="py-3 px-4 text-center whitespace-nowrap">${posisiBadge}</td>
+            <td class="py-3 px-4 text-center font-mono font-semibold text-slate-700">${m.sks_kumulatif ?? 0}</td>
+            <td class="py-3 px-4 text-center font-mono font-semibold text-slate-700">${Number(m.ipk || 0).toFixed(2)}</td>
+            <td class="py-3 px-4 text-center whitespace-nowrap">${taBadge}</td>
+            <td class="py-3 px-4 text-center">${riVal}</td>
+            <td class="py-3 px-4 text-center whitespace-nowrap">${statusVisualBadge}</td>
+            <td class="py-3 px-4">${klarifikasiCell}</td>
+            ${adminCol}
           </tr>
         `;
       }).join('');
     }
 
-    // =========================================================
-    // MODAL 1: DETAIL & KLARIFIKASI DOSEN WALI
-    // =========================================================
-    function openModal(npm) {
-      if (!currentAnalyticsData) return;
-      selectedModalNPM = npm;
-      const m = currentAnalyticsData.rawMahasiswa.find(x => x.npm === npm);
-      const ew = (currentAnalyticsData.detailRumus.F3_EarlyWarning.detail || []).find(x => x.npm === npm) || {};
-      const wa = (currentAnalyticsData.detailRumus.F9_Notifikasi.detail || []).find(x => x.npm === npm) || {};
-      const s0 = currentAnalyticsData.activeParameters?.s0_normal || 8;
+    function renderWAAlerts(f9) {
+      const list = (f9.detail || []).filter(d => d.statusNotif === 'Send WA Alert');
+      document.getElementById('waSummaryBadge').innerText = `${list.length} Alert Aktif`;
 
-      document.getElementById('modalNama').innerText = m.nama;
-      document.getElementById('modalNPM').innerText = `NPM: ${m.npm} | Angkatan ${m.angkatan}`;
-      document.getElementById('modalProdi').innerText = m.nama_prodi;
-      document.getElementById('modalDoswal').innerText = m.nama_dosen_wali || '-';
-
-      const selisih = m.semester_aktif ? m.semester_aktif - s0 : null;
-      const teksSem = m.status_studi === 'Lulus'
-        ? `Lulus (Sem ${m.semester_lulus})`
-        : (selisih === null ? 'Tidak Valid' : (selisih > 0 ? `Lebih +${selisih} Sem (Sem ${m.semester_aktif})` : `Sisa ${Math.abs(selisih)} Sem (Sem ${m.semester_aktif})`));
-
-      document.getElementById('modalSemester').innerText = teksSem;
-      document.getElementById('modalSKS').innerText = `${m.sks_kumulatif} SKS`;
-      document.getElementById('modalIPK').innerText = m.ipk;
-      document.getElementById('modalRiskIndex').innerText = ew.riskIndex ?? '-';
-      document.getElementById('inputKategoriPemicu').value = m.kategori_pemicu || '';
-
-      const boxWA = document.getElementById('containerPesanWA');
-      if (wa.pesan) {
-        document.getElementById('modalPesanWA').innerText = wa.pesan;
-        boxWA.classList.remove('hidden');
-      } else {
-        boxWA.classList.add('hidden');
+      const container = document.getElementById('waAlertList');
+      if (list.length === 0) {
+        container.innerHTML = `<div class="col-span-2 text-slate-500 bg-[#F8F9FA] rounded-xl p-3.5 border border-slate-200/80">Semua mahasiswa kritis telah memiliki klarifikasi atau tidak ada antrian notifikasi WA baru.</div>`;
+        return;
       }
 
-      document.getElementById('modalDetail').classList.remove('hidden');
-      document.getElementById('modalDetail').classList.add('flex');
+      container.innerHTML = list.slice(0, 6).map(item => `
+        <div class="bg-[#FDF7E7]/70 border border-[#F3E2BA] rounded-xl p-3.5 flex items-start gap-2.5">
+          <span class="px-2 py-0.5 rounded-lg gold-badge font-extrabold text-[10px] shrink-0">WA ALERT</span>
+          <div class="text-slate-700 leading-relaxed">${item.pesan}</div>
+        </div>
+      `).join('');
     }
 
-    function closeModal() {
-      document.getElementById('modalDetail').classList.add('hidden');
-      document.getElementById('modalDetail').classList.remove('flex');
+    function openKlarifikasiModal(npm) {
+      const m = (latestAnalytics?.rawMahasiswa || []).find(x => x.npm === npm);
+      if (!m) return;
+      document.getElementById('klarifikasiNpm').value = m.npm;
+      document.getElementById('klarifikasiMhsInfo').innerText = `${m.nama} (${m.npm}) — Sem ${m.semester_aktif || '-'}`;
+      document.getElementById('klarifikasiKategori').value = m.kategori_pemicu || '';
+      document.getElementById('modalKlarifikasi').classList.remove('hidden');
+      document.getElementById('modalKlarifikasi').classList.add('flex');
     }
 
-    async function simpanKlarifikasi() {
-      if (!selectedModalNPM) return;
-      const kategori_pemicu = document.getElementById('inputKategoriPemicu').value;
-      const res = await fetch(`${API_BASE}/mahasiswa/${selectedModalNPM}/klarifikasi`, {
+    function closeKlarifikasiModal() {
+      document.getElementById('modalKlarifikasi').classList.add('hidden');
+      document.getElementById('modalKlarifikasi').classList.remove('flex');
+    }
+
+    async function submitKlarifikasi(e) {
+      e.preventDefault();
+      const npm = document.getElementById('klarifikasiNpm').value;
+      const kategori_pemicu = document.getElementById('klarifikasiKategori').value;
+
+      const res = await fetch(`/api/mahasiswa/${npm}/klarifikasi`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ kategori_pemicu })
       }).then(r => r.json());
 
       if (res.success) {
-        alert(res.message);
-        closeModal();
-        onFilterChange();
+        closeKlarifikasiModal();
+        await fetchAnalytics();
+      } else {
+        alert(res.message || 'Gagal menyimpan klarifikasi.');
       }
     }
 
-    // =========================================================
-    // MODAL 2: ADMIN EDIT DATA MAHASISWA (REVISI #1)
-    // =========================================================
     function openEditModal(npm) {
-      if (!currentAnalyticsData || currentUser.role !== 'admin') return;
-      const m = currentAnalyticsData.rawMahasiswa.find(x => x.npm === npm);
+      const m = (latestAnalytics?.rawMahasiswa || []).find(x => x.npm === npm);
       if (!m) return;
 
-      editingNPM = npm;
-      document.getElementById('editModalSubtitle').innerText = `NPM: ${m.npm} — ${m.nama_prodi}`;
-      document.getElementById('editNama').value = m.nama;
-      document.getElementById('editAngkatan').value = m.angkatan;
+      document.getElementById('editNpm').value = m.npm;
+      document.getElementById('editNama').value = m.nama || '';
+      document.getElementById('editAngkatan').value = m.angkatan || 2021;
       document.getElementById('editStatusStudi').value = m.status_studi || 'Aktif';
       document.getElementById('editSemAktif').value = m.semester_aktif || '';
       document.getElementById('editSemLulus').value = m.semester_lulus || 8;
-      document.getElementById('editSKS').value = m.sks_kumulatif || 0;
-      document.getElementById('editIPK').value = m.ipk || 0;
+      document.getElementById('editSks').value = m.sks_kumulatif ?? 0;
+      document.getElementById('editIpk').value = m.ipk ?? 0;
       document.getElementById('editStatusTA').value = m.status_ta || '';
       document.getElementById('editProgresTA').value = Math.round((parseFloat(m.progres_ta) || 0) * 100);
-      document.getElementById('editPemicu').value = m.kategori_pemicu || '';
+      document.getElementById('editKategoriPemicu').value = m.kategori_pemicu || '';
 
-      onEditStatusChange();
-
-      document.getElementById('modalEditMhs').classList.remove('hidden');
-      document.getElementById('modalEditMhs').classList.add('flex');
+      toggleEditStatusFields();
+      document.getElementById('modalEditMahasiswa').classList.remove('hidden');
+      document.getElementById('modalEditMahasiswa').classList.add('flex');
     }
 
     function closeEditModal() {
-      editingNPM = null;
-      document.getElementById('modalEditMhs').classList.add('hidden');
-      document.getElementById('modalEditMhs').classList.remove('flex');
+      document.getElementById('modalEditMahasiswa').classList.add('hidden');
+      document.getElementById('modalEditMahasiswa').classList.remove('flex');
     }
 
-    function onEditStatusChange() {
-      const status = document.getElementById('editStatusStudi').value;
-      const wrapAktif = document.getElementById('wrapEditSemAktif');
-      const wrapLulus = document.getElementById('wrapEditSemLulus');
-
-      if (status === 'Lulus') {
-        wrapAktif.classList.add('hidden');
-        wrapLulus.classList.remove('hidden');
-        document.getElementById('editStatusTA').value = 'Lulus';
-        document.getElementById('editProgresTA').value = 100;
+    function toggleEditStatusFields() {
+      const st = document.getElementById('editStatusStudi').value;
+      if (st === 'Lulus') {
+        document.getElementById('wrapSemAktif').classList.add('hidden');
+        document.getElementById('wrapSemLulus').classList.remove('hidden');
       } else {
-        wrapAktif.classList.remove('hidden');
-        wrapLulus.classList.add('hidden');
+        document.getElementById('wrapSemAktif').classList.remove('hidden');
+        document.getElementById('wrapSemLulus').classList.add('hidden');
       }
     }
 
-    function onEditTAChange() {
-      const ta = document.getElementById('editStatusTA').value;
-      const mapPersen = {
-        '': 0,
-        'Pengajuan Judul': 20,
-        'SUR': 40,
-        'Bimbingan': 60,
-        'Ujian Sidang': 85,
-        'Lulus': 100
-      };
-      if (ta in mapPersen) {
-        document.getElementById('editProgresTA').value = mapPersen[ta];
-      }
-    }
-
-    async function submitEditMahasiswa(e) {
+    async function saveMahasiswa(e) {
       e.preventDefault();
-      if (!editingNPM) return;
+      const npm = document.getElementById('editNpm').value;
+      const btn = document.getElementById('btnSaveMhs');
+      btn.disabled = true;
+      btn.innerText = 'Menyimpan...';
 
-      const payload = {
-        nama: document.getElementById('editNama').value.trim(),
-        angkatan: document.getElementById('editAngkatan').value,
-        status_studi: document.getElementById('editStatusStudi').value,
-        semester_aktif: document.getElementById('editSemAktif').value,
-        semester_lulus: document.getElementById('editSemLulus').value,
-        sks_kumulatif: document.getElementById('editSKS').value,
-        ipk: document.getElementById('editIPK').value,
-        status_ta: document.getElementById('editStatusTA').value,
-        progres_ta_persen: document.getElementById('editProgresTA').value,
-        kategori_pemicu: document.getElementById('editPemicu').value
-      };
+      try {
+        const payload = {
+          nama: document.getElementById('editNama').value.trim(),
+          angkatan: document.getElementById('editAngkatan').value,
+          status_studi: document.getElementById('editStatusStudi').value,
+          semester_aktif: document.getElementById('editSemAktif').value,
+          semester_lulus: document.getElementById('editSemLulus').value,
+          sks_kumulatif: document.getElementById('editSks').value,
+          ipk: document.getElementById('editIpk').value,
+          status_ta: document.getElementById('editStatusTA').value,
+          progres_ta_persen: document.getElementById('editProgresTA').value,
+          kategori_pemicu: document.getElementById('editKategoriPemicu').value
+        };
 
-      const res = await fetch(`${API_BASE}/mahasiswa/${editingNPM}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).then(r => r.json());
+        const res = await fetch(`/api/mahasiswa/${npm}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).then(r => r.json());
 
-      if (res.success) {
-        alert(res.message);
-        closeEditModal();
-        onFilterChange();
-      } else {
-        alert('Gagal menyimpan: ' + (res.message || 'Terjadi kesalahan'));
-      }
-    }
-
-    // =========================================================
-    // MODAL 3: ADMIN ATUR RUMUS & BOBOT AEE (REVISI #2)
-    // =========================================================
-    async function openRumusModal() {
-      if (currentUser.role !== 'admin') return;
-      const res = await fetch(`${API_BASE}/parameters`).then(r => r.json());
-      const d = res.success ? res.data : (currentAnalyticsData?.activeParameters || {});
-
-      document.getElementById('paramW1').value = Math.round((Number(d.w1_ktw) || 0.40) * 100);
-      document.getElementById('paramW2').value = Math.round((Number(d.w2_masa_studi) || 0.35) * 100);
-      document.getElementById('paramW3').value = Math.round((Number(d.w3_progres_ta) || 0.25) * 100);
-      document.getElementById('paramS0').value = d.s0_normal || 8;
-      document.getElementById('paramKritisMin').value = d.batas_kritis_min || 9;
-      document.getElementById('paramKritisMax').value = d.batas_kritis_max || 14;
-      document.getElementById('paramTargetSks').value = d.target_sks || 144;
-      document.getElementById('paramIpkMin').value = d.ipk_minimal || 2.00;
-      document.getElementById('paramThresholdRi').value = d.threshold_ri || 1.00;
-      document.getElementById('paramThresholdTa').value = Math.round((Number(d.threshold_ta_kritis) || 0.25) * 100);
-
-      updateTotalBobotUI();
-
-      document.getElementById('modalRumus').classList.remove('hidden');
-      document.getElementById('modalRumus').classList.add('flex');
-    }
-
-    function closeRumusModal() {
-      document.getElementById('modalRumus').classList.add('hidden');
-      document.getElementById('modalRumus').classList.remove('flex');
-    }
-
-    function updateTotalBobotUI() {
-      const w1 = parseInt(document.getElementById('paramW1').value, 10) || 0;
-      const w2 = parseInt(document.getElementById('paramW2').value, 10) || 0;
-      const w3 = parseInt(document.getElementById('paramW3').value, 10) || 0;
-      const total = w1 + w2 + w3;
-
-      const badge = document.getElementById('badgeTotalBobot');
-      const btn = document.getElementById('btnSimpanRumus');
-
-      if (total === 100) {
-        badge.innerText = 'Total: 100% (Valid)';
-        badge.className = 'bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full text-[11px]';
+        if (res.success) {
+          closeEditModal();
+          await fetchAnalytics();
+        } else {
+          alert(res.message || 'Gagal memperbarui data mahasiswa.');
+        }
+      } finally {
         btn.disabled = false;
-        btn.classList.remove('opacity-50', 'cursor-not-allowed');
-      } else {
-        badge.innerText = `Total: ${total}% (Harus 100%)`;
-        badge.className = 'bg-rose-100 text-rose-800 font-bold px-2.5 py-0.5 rounded-full text-[11px]';
-        btn.disabled = true;
-        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        btn.innerText = 'Simpan Perubahan';
       }
     }
 
-    function resetDefaultRumus() {
-      document.getElementById('paramW1').value = 40;
-      document.getElementById('paramW2').value = 35;
-      document.getElementById('paramW3').value = 25;
-      document.getElementById('paramS0').value = 8;
-      document.getElementById('paramKritisMin').value = 9;
-      document.getElementById('paramKritisMax').value = 14;
-      document.getElementById('paramTargetSks').value = 144;
-      document.getElementById('paramIpkMin').value = 2.00;
-      document.getElementById('paramThresholdRi').value = 1.00;
-      document.getElementById('paramThresholdTa').value = 25;
-      updateTotalBobotUI();
+    async function openParamModal() {
+      document.getElementById('paramErrorBox').classList.add('hidden');
+      const p = latestAnalytics?.activeParameters || {};
+      document.getElementById('inputW1').value = Math.round((p.w1_ktw ?? 0.40) * 100);
+      document.getElementById('inputW2').value = Math.round((p.w2_masa_studi ?? 0.35) * 100);
+      document.getElementById('inputW3').value = Math.round((p.w3_progres_ta ?? 0.25) * 100);
+      document.getElementById('inputS0').value = p.s0_normal ?? 8;
+      document.getElementById('inputKritisMin').value = p.batas_kritis_min ?? 9;
+      document.getElementById('inputKritisMax').value = p.batas_kritis_max ?? 14;
+      document.getElementById('inputTargetSks').value = p.target_sks ?? 144;
+      document.getElementById('inputIpkMin').value = p.ipk_minimal ?? 2.00;
+      document.getElementById('inputThresholdRi').value = p.threshold_ri ?? 1.00;
+
+      updateBobotIndicator();
+      document.getElementById('modalParameters').classList.remove('hidden');
+      document.getElementById('modalParameters').classList.add('flex');
     }
 
-    async function submitRumusParameters(e) {
+    function closeParamModal() {
+      document.getElementById('modalParameters').classList.add('hidden');
+      document.getElementById('modalParameters').classList.remove('flex');
+    }
+
+    function updateBobotIndicator() {
+      const w1 = parseFloat(document.getElementById('inputW1').value) || 0;
+      const w2 = parseFloat(document.getElementById('inputW2').value) || 0;
+      const w3 = parseFloat(document.getElementById('inputW3').value) || 0;
+      const sum = w1 + w2 + w3;
+      const lbl = document.getElementById('totalBobotLabel');
+      lbl.innerText = `Total: ${sum}%`;
+      if (Math.abs(sum - 100) < 0.01) {
+        lbl.className = 'font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+      } else {
+        lbl.className = 'font-mono font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800';
+      }
+    }
+
+    function resetDefaultParams() {
+      document.getElementById('inputW1').value = 40;
+      document.getElementById('inputW2').value = 35;
+      document.getElementById('inputW3').value = 25;
+      document.getElementById('inputS0').value = 8;
+      document.getElementById('inputKritisMin').value = 9;
+      document.getElementById('inputKritisMax').value = 14;
+      document.getElementById('inputTargetSks').value = 144;
+      document.getElementById('inputIpkMin').value = 2.00;
+      document.getElementById('inputThresholdRi').value = 1.00;
+      updateBobotIndicator();
+    }
+
+    async function saveParameters(e) {
       e.preventDefault();
-      const payload = {
-        w1_ktw: (parseFloat(document.getElementById('paramW1').value) || 0) / 100,
-        w2_masa_studi: (parseFloat(document.getElementById('paramW2').value) || 0) / 100,
-        w3_progres_ta: (parseFloat(document.getElementById('paramW3').value) || 0) / 100,
-        s0_normal: parseInt(document.getElementById('paramS0').value, 10),
-        batas_kritis_min: parseInt(document.getElementById('paramKritisMin').value, 10),
-        batas_kritis_max: parseInt(document.getElementById('paramKritisMax').value, 10),
-        target_sks: parseInt(document.getElementById('paramTargetSks').value, 10),
-        ipk_minimal: parseFloat(document.getElementById('paramIpkMin').value),
-        threshold_ri: parseFloat(document.getElementById('paramThresholdRi').value),
-        threshold_ta_kritis: (parseFloat(document.getElementById('paramThresholdTa').value) || 0) / 100
-      };
+      const errBox = document.getElementById('paramErrorBox');
+      errBox.classList.add('hidden');
 
-      const res = await fetch(`${API_BASE}/parameters`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).then(r => r.json());
+      const w1 = (parseFloat(document.getElementById('inputW1').value) || 0) / 100;
+      const w2 = (parseFloat(document.getElementById('inputW2').value) || 0) / 100;
+      const w3 = (parseFloat(document.getElementById('inputW3').value) || 0) / 100;
 
-      if (res.success) {
-        alert(res.message);
-        closeRumusModal();
-        onFilterChange();
-      } else {
-        alert('Gagal menyimpan parameter: ' + (res.message || 'Periksa kembali input Anda'));
+      const btn = document.getElementById('btnSaveParam');
+      btn.disabled = true;
+      btn.innerText = 'Menghitung ulang...';
+
+      try {
+        const res = await fetch('/api/parameters', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            w1_ktw: w1,
+            w2_masa_studi: w2,
+            w3_progres_ta: w3,
+            s0_normal: document.getElementById('inputS0').value,
+            batas_kritis_min: document.getElementById('inputKritisMin').value,
+            batas_kritis_max: document.getElementById('inputKritisMax').value,
+            target_sks: document.getElementById('inputTargetSks').value,
+            ipk_minimal: document.getElementById('inputIpkMin').value,
+            threshold_ri: document.getElementById('inputThresholdRi').value,
+            threshold_ta_kritis: 0.25
+          })
+        }).then(r => r.json());
+
+        if (res.success) {
+          closeParamModal();
+          await fetchAnalytics();
+        } else {
+          errBox.innerText = res.message || 'Gagal menyimpan parameter.';
+          errBox.classList.remove('hidden');
+        }
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Simpan & Hitung Ulang';
       }
     }
 
-    document.addEventListener('DOMContentLoaded', initApp);
+    document.addEventListener('DOMContentLoaded', initDashboard);
   </script>
 </body>
 </html>

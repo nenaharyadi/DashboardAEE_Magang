@@ -81,22 +81,15 @@ exports.getAnalyticsAEE = async (req, res) => {
     const [mhsRows] = await db.query(queryMhs, paramsMhs);
     const [logMKRows] = await db.query('SELECT * FROM log_pengulangan_mk');
 
-    // Pemisahan Cohort vs Perwalian
+    // Kelompok Cohort untuk perhitungan KTW, Masa Studi, Proyeksi & Funnel TA (F1, F4, F5, F6, F7)
     const cohortRows = mhsRows.filter(
       m => m.npm.startsWith('1499102100') && parseInt(m.npm.slice(-2), 10) <= 30
     );
-
-    const perwalianRows = mhsRows.filter(
-      m => !(m.npm.startsWith('1499102100') && parseInt(m.npm.slice(-2), 10) <= 30)
-    );
-
     const evalCohort = cohortRows.length > 0 ? cohortRows : mhsRows;
 
-    // Untuk evaluasi Red-Flag & Early Warning, utamakan mahasiswa non-Lulus
-    const nonLulusPerwalian = perwalianRows.filter(m => m.status_studi !== 'Lulus');
-    const evalPerwalian = nonLulusPerwalian.length > 0
-      ? nonLulusPerwalian
-      : (perwalianRows.length > 0 ? perwalianRows : mhsRows);
+    // Seluruh mahasiswa yang belum lulus dievaluasi untuk Red-Flag (F2), Early Warning (F3), dan WA Alert (F9)
+    const activeMonitoringRows = mhsRows.filter(m => m.status_studi !== 'Lulus');
+    const evalPerwalian = activeMonitoringRows.length > 0 ? activeMonitoringRows : mhsRows;
 
     const doswalName = mhsRows[0]?.nama_dosen_wali || 'Dosen Wali';
 
